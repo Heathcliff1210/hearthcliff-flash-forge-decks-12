@@ -17,8 +17,8 @@ export const initDB = (): Promise<IDBDatabase> => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     
     request.onerror = (event) => {
-      console.error('Erreur d'ouverture de la base IndexedDB:', event);
-      reject('Impossible d'ouvrir la base IndexedDB');
+      console.error("Erreur d'ouverture de la base IndexedDB:", event);
+      reject("Impossible d'ouvrir la base IndexedDB");
     };
     
     request.onupgradeneeded = (event) => {
