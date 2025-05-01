@@ -19,6 +19,11 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				heading: ['Montserrat', 'sans-serif'],
+				body: ['Poppins', 'sans-serif'],
+				display: ['Raleway', 'sans-serif']
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -54,11 +59,10 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				theme: {
-					purple: '#9b87f5',
-					blue: '#7087f5',
-					green: '#87f59b',
-					orange: '#f5a587',
-					pink: '#f587b8',
+					red: '#ff5a5f',
+					orange: '#ff9e43',
+					pink: '#ff4088',
+					violet: '#a567e1',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -104,6 +108,14 @@ export default {
 				'pulse-slow': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.7' }
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
+				},
+				'slide-in-right': {
+					'0%': { transform: 'translateX(100%)' },
+					'100%': { transform: 'translateX(0)' }
 				}
 			},
 			animation: {
@@ -111,7 +123,9 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'flip': 'flip 1s ease-in-out',
 				'float': 'float 3s ease-in-out infinite',
-				'pulse-slow': 'pulse-slow 3s ease-in-out infinite'
+				'pulse-slow': 'pulse-slow 3s ease-in-out infinite',
+				'fade-in': 'fade-in 0.5s ease-out forwards',
+				'slide-in-right': 'slide-in-right 0.3s ease-out'
 			}
 		}
 	},

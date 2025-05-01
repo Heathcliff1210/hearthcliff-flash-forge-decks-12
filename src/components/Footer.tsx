@@ -1,20 +1,28 @@
 
 import { Link } from "react-router-dom";
 import { Github, Heart, Mail, Twitter } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Footer = () => {
+  const isMobile = useIsMobile();
+  
+  // Ne pas rendre le Footer sur mobile
+  if (isMobile) {
+    return null;
+  }
+
   return (
-    <footer className="border-t bg-background/50 py-6">
+    <footer className="border-t bg-background/50 py-6 animate-fade-in">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <h3 className="mb-4 text-lg font-semibold">CDS FLASHCARD-BASE</h3>
+            <h3 className="mb-4 text-lg font-semibold font-heading">CDS FLASHCARD-BASE</h3>
             <p className="text-sm text-muted-foreground">
               Créé avec passion en 2025 par Izumi Hearthcliff pour faciliter l'apprentissage par flashcards.
             </p>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Liens Rapides</h3>
+            <h3 className="mb-4 text-lg font-semibold font-heading">Liens Rapides</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/" className="text-muted-foreground hover:text-foreground">
@@ -39,7 +47,7 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Ressources</h3>
+            <h3 className="mb-4 text-lg font-semibold font-heading">Ressources</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/guide" className="text-muted-foreground hover:text-foreground">
@@ -59,7 +67,7 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Contact</h3>
+            <h3 className="mb-4 text-lg font-semibold font-heading">Contact</h3>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="h-4 w-4" />
@@ -82,7 +90,7 @@ const Footer = () => {
           </p>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Fait avec</span>
-            <Heart className="h-4 w-4 text-red-500" fill="currentColor" />
+            <Heart className="h-4 w-4 text-primary" fill="currentColor" />
             <span>par Izumi Hearthcliff</span>
           </div>
         </div>

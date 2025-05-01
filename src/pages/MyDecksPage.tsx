@@ -1,85 +1,125 @@
+
 import { useState, useEffect } from 'react';
-import { getDecks, type Deck } from '@/lib/localStorage';
 import { getUser } from '@/lib/localStorage';
 import DeckCard from '@/components/DeckCard';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'react-router-dom';
-import { Plus, RefreshCcw } from 'lucide-react';
+import { Plus, RefreshCcw, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { initStorage, getDecks } from '@/lib/storageService';
+import type { Deck } from '@/lib/localStorage';
 
 const MyDecksPage = () => {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [user, setUser] = useState(getUser());
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
-  const refreshDecks = () => {
-    const currentUser = getUser();
-    setUser(currentUser);
+  const fetchDecks = async () => {
+    setIsLoading(true);
+    try {
+      const currentUser = getUser();
+      setUser(currentUser);
+      
+      const allDecks = await getDecks();
+      const userDecks = allDecks.filter(deck => deck.authorId === currentUser?.id);
+      
+      console.log('Fetching decks for user:', currentUser?.id);
+      console.log('Found decks:', userDecks.length);
+      
+      setDecks(userDecks);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching decks:', error);
+      setIsLoading(false);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger vos decks.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const refreshDecks = async () => {
+    setIsLoading(true);
     
-    const allDecks = getDecks();
-    const userDecks = allDecks.filter(deck => deck.authorId === currentUser?.id);
-    
-    console.log('Refreshing decks for user:', currentUser?.id);
-    console.log('Found decks:', userDecks.length);
-    
-    setDecks(userDecks);
-    toast({
-      title: "Liste mise à jour",
-      description: `${userDecks.length} deck(s) trouvé(s)`,
-    });
+    try {
+      const currentUser = getUser();
+      setUser(currentUser);
+      
+      const allDecks = await getDecks();
+      const userDecks = allDecks.filter(deck => deck.authorId === currentUser?.id);
+      
+      console.log('Refreshing decks for user:', currentUser?.id);
+      console.log('Found decks:', userDecks.length);
+      
+      setDecks(userDecks);
+      toast({
+        title: "Liste mise à jour",
+        description: `${userDecks.length} deck(s) trouvé(s)`,
+      });
+    } catch (error) {
+      console.error('Error refreshing decks:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'actualiser vos decks.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    const currentUser = getUser();
-    setUser(currentUser);
-    
-    const userDecks = getDecks().filter(deck => deck.authorId === currentUser?.id);
-    console.log('Navigation refresh - User ID:', currentUser?.id);
-    console.log('Navigation refresh - Decks found:', userDecks.length);
-    setDecks(userDecks);
-  }, [location.key]);
-
-  useEffect(() => {
-    const initialUser = getUser();
-    console.log('Initial load - User ID:', initialUser?.id);
-    const initialDecks = getDecks().filter(deck => deck.authorId === initialUser?.id);
-    console.log('Initial load - Decks found:', initialDecks.length);
-    setDecks(initialDecks);
-    
-    const initialRefreshTimeout = setTimeout(() => {
-      refreshDecks();
-    }, 1000);
-    
-    const intervalId = setInterval(() => {
-      const latestUser = getUser();
-      if (latestUser) {
-        const freshDecks = getDecks().filter(deck => deck.authorId === latestUser.id);
-        if (JSON.stringify(freshDecks) !== JSON.stringify(decks)) {
-          setDecks(freshDecks);
-        }
+    const initializeApp = async () => {
+      try {
+        await initStorage();
+        await fetchDecks();
+      } catch (error) {
+        console.error('Error initializing storage:', error);
+        setIsLoading(false);
+        toast({
+          title: "Erreur d'initialisation",
+          description: "Impossible d'initialiser le stockage. Utilisation du stockage local uniquement.",
+          variant: "destructive"
+        });
       }
-    }, 2000);
-    
-    return () => {
-      clearTimeout(initialRefreshTimeout);
-      clearInterval(intervalId);
     };
+    
+    initializeApp();
   }, []);
 
+  useEffect(() => {
+    fetchDecks();
+  }, [location.key]);
+
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Mes Decks</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={refreshDecks}>
-            <RefreshCcw className="mr-2 h-4 w-4" />
+    <div className="container mx-auto p-4 md:p-6 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <h1 className="text-3xl font-bold font-heading bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4 md:mb-0">
+          Mes Decks
+        </h1>
+        <div className="flex gap-2 w-full md:w-auto">
+          <Button 
+            variant="outline" 
+            onClick={refreshDecks} 
+            disabled={isLoading}
+            className="flex-1 md:flex-none"
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCcw className="mr-2 h-4 w-4" />
+            )}
             Actualiser
           </Button>
-          <Button asChild>
+          <Button asChild className="flex-1 md:flex-none">
             <Link to="/create">
               <Plus className="mr-2 h-4 w-4" />
-              Créer un nouveau deck
+              {isMobile ? "Créer" : "Créer un nouveau deck"}
             </Link>
           </Button>
         </div>
@@ -91,12 +131,17 @@ const MyDecksPage = () => {
         </div>
       </div>
 
-      {decks.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-muted-foreground">Chargement des decks...</span>
+        </div>
+      ) : decks.length === 0 ? (
+        <div className="text-center py-12 card-gradient-accent rounded-lg p-8">
+          <p className="text-muted-foreground mb-6">
             Vous n'avez pas encore créé de decks.
           </p>
-          <Button asChild>
+          <Button asChild size="lg" className="animate-pulse-slow">
             <Link to="/create">
               <Plus className="mr-2 h-4 w-4" />
               Créer votre premier deck

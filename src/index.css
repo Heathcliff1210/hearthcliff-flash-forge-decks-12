@@ -1,36 +1,42 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Raleway:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    /* Base colors */
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
+    
+    /* New palette - Warm gradients */
+    --primary: 340 82% 52%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --secondary: 10 100% 74%;
+    --secondary-foreground: 355 100% 97%;
+    --muted: 14 30% 94%;
+    --muted-foreground: 240 5% 34%;
+    --accent: 288 95% 90%;
+    --accent-foreground: 300 20% 25%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 340 82% 52%;
+    --radius: 0.75rem;
     
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 248 90% 66%;
+    --sidebar-primary: 340 82% 52%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 190 95% 85%;
+    --sidebar-accent: 288 95% 90%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 240 5.9% 90%;
     --sidebar-ring: 248 90% 66%;
@@ -43,26 +49,28 @@
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    
+    /* Dark theme warm gradients */
+    --primary: 340 82% 52%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 10 80% 60%;
+    --secondary-foreground: 355 100% 97%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --accent: 288 70% 40%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --ring: 340 82% 52%;
     
-    /* Sidebar */
+    /* Sidebar Dark Mode */
     --sidebar-background: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 248 90% 66%;
+    --sidebar-primary: 340 82% 52%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 190 95% 40%;
+    --sidebar-accent: 288 70% 40%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 248 90% 66%;
@@ -97,7 +105,10 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 }
 
@@ -109,7 +120,20 @@
   @apply text-primary font-semibold;
 }
 
-/* Animation */
+/* Card gradients */
+.card-gradient-primary {
+  @apply bg-gradient-to-br from-primary/20 via-background to-secondary/20 backdrop-blur-sm;
+}
+
+.card-gradient-secondary {
+  @apply bg-gradient-to-br from-secondary/20 via-background to-accent/20 backdrop-blur-sm;
+}
+
+.card-gradient-accent {
+  @apply bg-gradient-to-tr from-accent/30 to-background backdrop-blur-sm;
+}
+
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -126,4 +150,70 @@
   to {
     transform: translateX(0);
   }
+}
+
+@keyframes flip {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(180deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-in-out;
+}
+
+.animate-flip {
+  animation: flip 0.6s ease-in-out;
+  backface-visibility: hidden;
+}
+
+.animate-float {
+  animation: float 3s infinite ease-in-out;
+}
+
+/* Accessibility classes */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Touch improvements */
+@media (hover: none) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  button, 
+  .button, 
+  a.button, 
+  input[type="button"], 
+  input[type="submit"], 
+  input[type="reset"] {
+    @apply touch-target;
+  }
+}
+
+/* Responsive utilities */
+.hide-on-mobile {
+  @apply hidden md:block;
+}
+
+.show-on-mobile {
+  @apply block md:hidden;
 }
