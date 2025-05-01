@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Raleway:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap');
 
 @tailwind base;
@@ -15,14 +14,14 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     
-    /* Nouvelle palette - Dégradé chaud avec rouge, jaune et rose */
-    --primary: 340 82% 52%;        /* Rose vif */
+    /* Harmonious warm gradient palette with purple, red, orange and yellow */
+    --primary: 270 70% 60%;       /* Purple */
     --primary-foreground: 0 0% 98%;
-    --secondary: 35 100% 60%;      /* Jaune doré */
+    --secondary: 40 100% 60%;     /* Golden Yellow */
     --secondary-foreground: 355 100% 97%;
-    --tertiary: 10 95% 60%;        /* Rouge orangé */
+    --tertiary: 5 95% 65%;        /* Warm Red */
     --tertiary-foreground: 0 0% 98%;
-    --quaternary: 288 95% 60%;     /* Violet rose */
+    --quaternary: 25 100% 60%;    /* Vibrant Orange */
     --quaternary-foreground: 0 0% 98%;
     --muted: 14 30% 94%;
     --muted-foreground: 240 5% 34%;
@@ -32,13 +31,13 @@
     --destructive-foreground: 0 0% 98%;
     --border: 20 5.9% 90%;
     --input: 20 5.9% 90%;
-    --ring: 340 82% 52%;
+    --ring: 270 70% 60%;
     --radius: 1rem;
     
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 340 82% 52%;
+    --sidebar-primary: 270 70% 60%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 288 95% 90%;
     --sidebar-accent-foreground: 240 5.9% 10%;
@@ -54,14 +53,14 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
     
-    /* Dark theme avec dégradé chaud */
-    --primary: 340 82% 52%;        /* Rose vif */
+    /* Dark theme with harmonious gradient */
+    --primary: 270 70% 60%;       /* Purple */
     --primary-foreground: 0 0% 98%;
-    --secondary: 35 95% 50%;       /* Jaune doré plus foncé */
+    --secondary: 40 90% 50%;      /* Golden Yellow darker */
     --secondary-foreground: 355 100% 97%;
-    --tertiary: 10 90% 50%;        /* Rouge orangé plus foncé */
+    --tertiary: 5 85% 55%;        /* Warm Red darker */
     --tertiary-foreground: 0 0% 98%;
-    --quaternary: 288 90% 50%;     /* Violet rose plus foncé */
+    --quaternary: 25 85% 50%;     /* Vibrant Orange darker */
     --quaternary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
@@ -71,12 +70,12 @@
     --destructive-foreground: 0 85.7% 97.3%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 340 82% 52%;
+    --ring: 270 70% 60%;
     
     /* Sidebar Dark Mode */
     --sidebar-background: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 340 82% 52%;
+    --sidebar-primary: 270 70% 60%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 288 70% 40%;
     --sidebar-accent-foreground: 0 0% 98%;
@@ -131,17 +130,17 @@
   @apply text-primary font-semibold;
 }
 
-/* Card gradients améliorés */
+/* Enhanced card gradients with new color palette */
 .card-gradient-primary {
-  @apply bg-gradient-to-br from-primary/20 via-background to-secondary/30 backdrop-blur-sm;
+  @apply bg-gradient-to-br from-primary/20 via-background to-tertiary/20 backdrop-blur-sm;
 }
 
 .card-gradient-secondary {
-  @apply bg-gradient-to-br from-secondary/30 via-background to-tertiary/20 backdrop-blur-sm;
+  @apply bg-gradient-to-br from-secondary/30 via-background to-quaternary/20 backdrop-blur-sm;
 }
 
 .card-gradient-tertiary {
-  @apply bg-gradient-to-br from-tertiary/20 via-background to-quaternary/30 backdrop-blur-sm;
+  @apply bg-gradient-to-br from-tertiary/20 via-background to-primary/20 backdrop-blur-sm;
 }
 
 .card-gradient-accent {
