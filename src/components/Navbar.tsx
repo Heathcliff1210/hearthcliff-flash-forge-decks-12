@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Plus, Search, User, Menu, X, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navbar = () => {
@@ -11,18 +11,44 @@ const Navbar = () => {
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  const [showMobileNav, setShowMobileNav] = useState(false);
+  
+  useEffect(() => {
+    // Fonction pour gérer le défilement et masquer/afficher la barre de navigation mobile
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setShowMobileNav(false);
+      } else {
+        setShowMobileNav(true);
+      }
+    };
+    
+    // Ajouter l'écouteur d'événement uniquement sur mobile
+    if (isMobile) {
+      window.addEventListener('scroll', handleScroll);
+    }
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isMobile]);
+  
+  // Fermer le menu lorsqu'une route change
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
+    <header className={`sticky top-0 z-50 w-full border-b bg-background/90 backdrop-blur-lg ${isMobile ? 'transition-transform duration-300' : ''}`}>
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
             <span className="text-2xl">🎭</span>
-            <h1 className="hidden font-bold font-heading text-lg sm:inline-block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="hidden font-bold font-display text-lg sm:inline-block bg-gradient-to-r from-primary via-tertiary to-secondary bg-clip-text text-transparent">
               CDS FLASHCARD-BASE
             </h1>
           </Link>
@@ -60,7 +86,7 @@ const Navbar = () => {
             <Search className="h-5 w-5" />
           </Button>
           
-          <Button asChild variant="default" size="sm" className="hidden md:flex">
+          <Button asChild variant="default" size="sm" className="hidden md:flex bg-gradient-to-r from-primary to-tertiary hover:from-primary/90 hover:to-tertiary/90">
             <Link to="/create">
               <Plus className="mr-2 h-4 w-4" />
               Créer un deck
@@ -82,7 +108,7 @@ const Navbar = () => {
       {/* Mobile Navigation - Drawer style */}
       {isMenuOpen && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 md:hidden animate-fade-in">
-          <div className="bg-background h-full w-4/5 max-w-xs p-6 shadow-lg animate-slide-in-right">
+          <div className="bg-gradient-to-br from-background to-accent/10 h-full w-4/5 max-w-xs p-6 shadow-xl animate-slide-in-right">
             <div className="flex justify-between items-center mb-8">
               <span className="text-2xl">🎭</span>
               <Button 
@@ -102,7 +128,7 @@ const Navbar = () => {
                 onClick={toggleMenu}
               >
                 <Home className="h-5 w-5" />
-                <span>Accueil</span>
+                <span className="font-heading">Accueil</span>
               </Link>
               
               <Link 
@@ -111,7 +137,7 @@ const Navbar = () => {
                 onClick={toggleMenu}
               >
                 <Search className="h-5 w-5" />
-                <span>Explorer</span>
+                <span className="font-heading">Explorer</span>
               </Link>
               
               <Link 
@@ -120,7 +146,7 @@ const Navbar = () => {
                 onClick={toggleMenu}
               >
                 <Plus className="h-5 w-5" />
-                <span>Créer</span>
+                <span className="font-heading">Créer</span>
               </Link>
               
               <Link 
@@ -129,7 +155,7 @@ const Navbar = () => {
                 onClick={toggleMenu}
               >
                 <User className="h-5 w-5" />
-                <span>Profil</span>
+                <span className="font-heading">Profil</span>
               </Link>
               
               <Link 
@@ -138,12 +164,12 @@ const Navbar = () => {
                 onClick={toggleMenu}
               >
                 <Folder className="h-5 w-5" />
-                <span>Mes Decks</span>
+                <span className="font-heading">Mes Decks</span>
               </Link>
             </nav>
             
             <div className="absolute bottom-0 left-0 right-0 p-6 border-t">
-              <Button asChild variant="default" className="w-full touch-target">
+              <Button asChild variant="default" className="w-full touch-target bg-gradient-to-r from-primary to-tertiary hover:from-primary/90 hover:to-tertiary/90">
                 <Link to="/create" onClick={toggleMenu}>
                   <Plus className="mr-2 h-4 w-4" />
                   Créer un nouveau deck
@@ -151,6 +177,38 @@ const Navbar = () => {
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Navigation mobile en bas de l'écran */}
+      {isMobile && !isMenuOpen && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t z-40 flex justify-around items-center py-2 animate-slide-in-bottom">
+          <Link to="/" className={`flex flex-col items-center p-2 ${location.pathname === '/' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Home className="h-5 w-5" />
+            <span className="text-xs mt-1">Accueil</span>
+          </Link>
+          
+          <Link to="/explore" className={`flex flex-col items-center p-2 ${location.pathname === '/explore' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Search className="h-5 w-5" />
+            <span className="text-xs mt-1">Explorer</span>
+          </Link>
+          
+          <Link to="/create" className="flex flex-col items-center p-2">
+            <div className="bg-gradient-to-r from-primary to-tertiary rounded-full p-2 -mt-6 shadow-lg">
+              <Plus className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xs mt-1">Créer</span>
+          </Link>
+          
+          <Link to="/my-decks" className={`flex flex-col items-center p-2 ${location.pathname === '/my-decks' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Folder className="h-5 w-5" />
+            <span className="text-xs mt-1">Decks</span>
+          </Link>
+          
+          <Link to="/profile" className={`flex flex-col items-center p-2 ${location.pathname === '/profile' ? 'text-primary' : 'text-muted-foreground'}`}>
+            <User className="h-5 w-5" />
+            <span className="text-xs mt-1">Profil</span>
+          </Link>
         </div>
       )}
     </header>

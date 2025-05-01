@@ -1,4 +1,3 @@
-
 import { Deck, Flashcard, Theme, User } from './localStorage';
 
 // Définition des constantes pour les stores IndexedDB
@@ -9,6 +8,23 @@ const STORES = {
   FLASHCARDS: 'flashcards',
   THEMES: 'themes',
   USERS: 'users',
+  MEDIA: 'media' // Nouveau store pour les médias (images, audio, etc.)
+};
+
+// Configuration pour augmenter la capacité de stockage (en octets)
+const DEFAULT_QUOTA = 100 * 1024 * 1024; // 100 MB par défaut
+
+// Fonction pour demander plus d'espace de stockage si disponible
+const requestStorageQuota = async () => {
+  if (navigator.storage && navigator.storage.persist) {
+    const isPersisted = await navigator.storage.persist();
+    console.log(`Le stockage persistant est ${isPersisted ? 'activé' : 'non activé'}`);
+    
+    if (navigator.storage.estimate) {
+      const estimate = await navigator.storage.estimate();
+      console.log(`Utilisation du stockage: ${Math.round(estimate.usage / 1024 / 1024)}MB sur ${Math.round(estimate.quota / 1024 / 1024)}MB`);
+    }
+  }
 };
 
 // Initialisation de la base de données
@@ -40,14 +56,32 @@ export const initDB = (): Promise<IDBDatabase> => {
       if (!db.objectStoreNames.contains(STORES.USERS)) {
         db.createObjectStore(STORES.USERS, { keyPath: 'id' });
       }
+      
+      // Nouveau store pour les médias avec un index pour les recherches rapides
+      if (!db.objectStoreNames.contains(STORES.MEDIA)) {
+        const mediaStore = db.createObjectStore(STORES.MEDIA, { keyPath: 'id' });
+        mediaStore.createIndex('type', 'type', { unique: false });
+        mediaStore.createIndex('relatedId', 'relatedId', { unique: false });
+      }
     };
     
     request.onsuccess = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
+      // Demander plus d'espace de stockage si possible
+      requestStorageQuota().catch(console.error);
       resolve(db);
     };
   });
 };
+
+// Structure pour les médias
+export interface MediaItem {
+  id: string;
+  type: 'image' | 'audio' | 'video';
+  data: Blob | string; // URL ou données binaires
+  relatedId?: string; // ID du deck ou de la flashcard associée
+  createdAt: string;
+}
 
 // Fonction générique pour ajouter un élément
 export const addItem = async <T>(storeName: string, item: T): Promise<T> => {
@@ -243,7 +277,76 @@ export const deleteTheme = (id: string): Promise<boolean> => {
   return deleteItem(STORES.THEMES, id);
 };
 
-// Fonctions de migration pour transférer les données de localStorage vers IndexedDB
+// Fonctions spécifiques pour les médias
+export const addMedia = (media: MediaItem): Promise<MediaItem> => {
+  return addItem<MediaItem>(STORES.MEDIA, media);
+};
+
+export const updateMedia = (media: MediaItem): Promise<MediaItem> => {
+  return updateItem<MediaItem>(STORES.MEDIA, media);
+};
+
+export const getMedia = (id: string): Promise<MediaItem | null> => {
+  return getItemById<MediaItem>(STORES.MEDIA, id);
+};
+
+export const getAllMedia = (): Promise<MediaItem[]> => {
+  return getAllItems<MediaItem>(STORES.MEDIA);
+};
+
+export const getMediaByType = async (type: 'image' | 'audio' | 'video'): Promise<MediaItem[]> => {
+  const db = await initDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORES.MEDIA, 'readonly');
+    const store = transaction.objectStore(STORES.MEDIA);
+    const index = store.index('type');
+    const request = index.getAll(type);
+    
+    request.onerror = (event) => {
+      console.error(`Erreur lors de la récupération des médias de type ${type}:`, event);
+      reject(`Échec de la récupération des médias de type ${type}`);
+    };
+    
+    request.onsuccess = () => {
+      resolve(request.result || []);
+    };
+    
+    transaction.oncomplete = () => {
+      db.close();
+    };
+  });
+};
+
+export const getMediaByRelatedId = async (relatedId: string): Promise<MediaItem[]> => {
+  const db = await initDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORES.MEDIA, 'readonly');
+    const store = transaction.objectStore(STORES.MEDIA);
+    const index = store.index('relatedId');
+    const request = index.getAll(relatedId);
+    
+    request.onerror = (event) => {
+      console.error(`Erreur lors de la récupération des médias associés à ${relatedId}:`, event);
+      reject(`Échec de la récupération des médias associés à ${relatedId}`);
+    };
+    
+    request.onsuccess = () => {
+      resolve(request.result || []);
+    };
+    
+    transaction.oncomplete = () => {
+      db.close();
+    };
+  });
+};
+
+export const deleteMedia = (id: string): Promise<boolean> => {
+  return deleteItem(STORES.MEDIA, id);
+};
+
+// Fonction améliorée pour la migration des données
 export const migrateLocalStorageToIndexedDB = async (): Promise<boolean> => {
   try {
     // Importer les fonctions de localStorage
@@ -254,6 +357,8 @@ export const migrateLocalStorageToIndexedDB = async (): Promise<boolean> => {
     const flashcards = getFlashcards();
     const themes = getThemes();
     const user = getUser();
+    
+    console.log(`Migration: ${decks.length} decks, ${flashcards.length} flashcards, ${themes.length} thèmes`);
     
     // Stocker les decks dans IndexedDB
     for (const deck of decks) {
@@ -282,7 +387,41 @@ export const migrateLocalStorageToIndexedDB = async (): Promise<boolean> => {
   }
 };
 
+// Vérifier la capacité de stockage disponible
+export const checkStorageCapacity = async (): Promise<{ usage: number, quota: number, percentUsed: number }> => {
+  if (navigator.storage && navigator.storage.estimate) {
+    const estimate = await navigator.storage.estimate();
+    const usage = estimate.usage || 0;
+    const quota = estimate.quota || DEFAULT_QUOTA;
+    const percentUsed = Math.round((usage / quota) * 100);
+    
+    return { usage, quota, percentUsed };
+  }
+  
+  return { usage: 0, quota: DEFAULT_QUOTA, percentUsed: 0 };
+};
+
 // Fonction pour vérifier si l'IndexedDB est disponible
 export const isIndexedDBAvailable = (): boolean => {
   return window.indexedDB !== undefined && window.indexedDB !== null;
+};
+
+// Fonction pour nettoyer les données obsolètes
+export const cleanupOldData = async (): Promise<number> => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const cutoffDate = thirtyDaysAgo.toISOString();
+    
+    // Récupérer les vieux média non utilisés
+    const allMedia = await getAllMedia();
+    const oldMediaCount = allMedia.filter(media => media.createdAt < cutoffDate).length;
+    
+    // Suppression pourrait être implémentée ici si nécessaire
+    
+    return oldMediaCount;
+  } catch (error) {
+    console.error("Erreur lors du nettoyage des données:", error);
+    return 0;
+  }
 };

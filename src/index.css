@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Raleway:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Raleway:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,11 +15,15 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     
-    /* New palette - Warm gradients */
-    --primary: 340 82% 52%;
+    /* Nouvelle palette - Dégradé chaud avec rouge, jaune et rose */
+    --primary: 340 82% 52%;        /* Rose vif */
     --primary-foreground: 0 0% 98%;
-    --secondary: 10 100% 74%;
+    --secondary: 35 100% 60%;      /* Jaune doré */
     --secondary-foreground: 355 100% 97%;
+    --tertiary: 10 95% 60%;        /* Rouge orangé */
+    --tertiary-foreground: 0 0% 98%;
+    --quaternary: 288 95% 60%;     /* Violet rose */
+    --quaternary-foreground: 0 0% 98%;
     --muted: 14 30% 94%;
     --muted-foreground: 240 5% 34%;
     --accent: 288 95% 90%;
@@ -29,7 +33,7 @@
     --border: 20 5.9% 90%;
     --input: 20 5.9% 90%;
     --ring: 340 82% 52%;
-    --radius: 0.75rem;
+    --radius: 1rem;
     
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
@@ -50,11 +54,15 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
     
-    /* Dark theme warm gradients */
-    --primary: 340 82% 52%;
+    /* Dark theme avec dégradé chaud */
+    --primary: 340 82% 52%;        /* Rose vif */
     --primary-foreground: 0 0% 98%;
-    --secondary: 10 80% 60%;
+    --secondary: 35 95% 50%;       /* Jaune doré plus foncé */
     --secondary-foreground: 355 100% 97%;
+    --tertiary: 10 90% 50%;        /* Rouge orangé plus foncé */
+    --tertiary-foreground: 0 0% 98%;
+    --quaternary: 288 90% 50%;     /* Violet rose plus foncé */
+    --quaternary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
     --accent: 288 70% 40%;
@@ -76,27 +84,21 @@
     --sidebar-ring: 248 90% 66%;
   }
   
-  /* Force desktop view on mobile devices */
-  html.force-desktop {
-    min-width: 1024px; /* lg breakpoint */
-  }
-  
-  html.force-desktop body {
-    min-width: 1024px;
-    overflow-x: auto;
-  }
-  
-  /* Force mobile view on desktop devices */
-  html.force-mobile {
-    max-width: 640px; /* sm breakpoint */
-    margin-left: auto;
-    margin-right: auto;
+  /* Mobile first design */
+  html, body {
     overflow-x: hidden;
+    width: 100%;
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
-  html.force-mobile body {
-    max-width: 640px;
-    overflow-x: hidden;
+  /* Taille minimale du texte pour le mobile */
+  @media (max-width: 640px) {
+    html {
+      font-size: 14px;
+    }
   }
 }
 
@@ -107,30 +109,43 @@
   body {
     @apply bg-background text-foreground font-body;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1, h2, h3 {
+    @apply font-display;
+  }
+  h4, h5, h6 {
     @apply font-heading;
+  }
+  p {
+    @apply font-body;
+  }
+  blockquote {
+    @apply font-serif;
   }
 }
 
 .nav-link {
-  @apply px-3 py-2 text-sm font-medium transition-colors hover:text-primary;
+  @apply px-3 py-2 text-sm font-medium transition-colors hover:text-primary active:text-primary;
 }
 
 .nav-link.active {
   @apply text-primary font-semibold;
 }
 
-/* Card gradients */
+/* Card gradients améliorés */
 .card-gradient-primary {
-  @apply bg-gradient-to-br from-primary/20 via-background to-secondary/20 backdrop-blur-sm;
+  @apply bg-gradient-to-br from-primary/20 via-background to-secondary/30 backdrop-blur-sm;
 }
 
 .card-gradient-secondary {
-  @apply bg-gradient-to-br from-secondary/20 via-background to-accent/20 backdrop-blur-sm;
+  @apply bg-gradient-to-br from-secondary/30 via-background to-tertiary/20 backdrop-blur-sm;
+}
+
+.card-gradient-tertiary {
+  @apply bg-gradient-to-br from-tertiary/20 via-background to-quaternary/30 backdrop-blur-sm;
 }
 
 .card-gradient-accent {
-  @apply bg-gradient-to-tr from-accent/30 to-background backdrop-blur-sm;
+  @apply bg-gradient-to-tr from-quaternary/30 to-background backdrop-blur-sm;
 }
 
 /* Animations */
@@ -152,6 +167,15 @@
   }
 }
 
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @keyframes flip {
   0% { transform: rotateY(0deg); }
   100% { transform: rotateY(180deg); }
@@ -162,12 +186,21 @@
   50% { transform: translateY(-10px); }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }
 
 .animate-slide-in {
   animation: slideIn 0.5s ease-in-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-in-out;
 }
 
 .animate-flip {
@@ -177,6 +210,10 @@
 
 .animate-float {
   animation: float 3s infinite ease-in-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite ease-in-out;
 }
 
 /* Accessibility classes */
@@ -195,8 +232,9 @@
 /* Touch improvements */
 @media (hover: none) {
   .touch-target {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px;
   }
   
   button, 
@@ -216,4 +254,26 @@
 
 .show-on-mobile {
   @apply block md:hidden;
+}
+
+/* Mobile app styles */
+.mobile-app-container {
+  @apply max-w-md mx-auto h-full flex flex-col;
+}
+
+.mobile-app-header {
+  @apply sticky top-0 z-40 bg-background/95 backdrop-blur-lg border-b;
+}
+
+.mobile-app-content {
+  @apply flex-1 overflow-auto pb-16;
+}
+
+.mobile-app-navigation {
+  @apply fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-lg border-t flex justify-around items-center py-2;
+}
+
+/* Badge de notification */
+.notification-badge {
+  @apply absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center;
 }

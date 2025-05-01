@@ -4,7 +4,7 @@ import { getUser } from '@/lib/localStorage';
 import DeckCard from '@/components/DeckCard';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'react-router-dom';
-import { Plus, RefreshCcw, Loader2 } from 'lucide-react';
+import { Plus, RefreshCcw, Loader2, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { initStorage, getDecks } from '@/lib/storageService';
@@ -17,6 +17,7 @@ const MyDecksPage = () => {
   const location = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [storageInfo, setStorageInfo] = useState<{ usage: number, quota: number, percentUsed: number } | null>(null);
 
   const fetchDecks = async () => {
     setIsLoading(true);
@@ -31,6 +32,18 @@ const MyDecksPage = () => {
       console.log('Found decks:', userDecks.length);
       
       setDecks(userDecks);
+      
+      // Vérifier l'utilisation du stockage
+      if (window.navigator.storage && window.navigator.storage.estimate) {
+        const estimate = await window.navigator.storage.estimate();
+        const usage = estimate.usage || 0;
+        const quota = estimate.quota || 100 * 1024 * 1024; // 100 MB par défaut
+        const percentUsed = Math.round((usage / quota) * 100);
+        
+        setStorageInfo({ usage, quota, percentUsed });
+        console.log(`Utilisation du stockage: ${Math.round(usage / 1024 / 1024)}MB sur ${Math.round(quota / 1024 / 1024)}MB`);
+      }
+      
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching decks:', error);
@@ -97,9 +110,9 @@ const MyDecksPage = () => {
   }, [location.key]);
 
   return (
-    <div className="container mx-auto p-4 md:p-6 animate-fade-in">
+    <div className={`container mx-auto p-4 md:p-6 animate-fade-in pb-20 ${isMobile ? 'mobile-app-container' : ''}`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h1 className="text-3xl font-bold font-heading bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4 md:mb-0">
+        <h1 className="text-2xl md:text-3xl font-bold font-display bg-gradient-to-r from-primary via-tertiary to-secondary bg-clip-text text-transparent mb-4 md:mb-0">
           Mes Decks
         </h1>
         <div className="flex gap-2 w-full md:w-auto">
@@ -114,9 +127,12 @@ const MyDecksPage = () => {
             ) : (
               <RefreshCcw className="mr-2 h-4 w-4" />
             )}
-            Actualiser
+            {!isMobile && "Actualiser"}
           </Button>
-          <Button asChild className="flex-1 md:flex-none">
+          <Button 
+            asChild 
+            className="flex-1 md:flex-none bg-gradient-to-r from-primary to-tertiary hover:from-primary/90 hover:to-tertiary/90"
+          >
             <Link to="/create">
               <Plus className="mr-2 h-4 w-4" />
               {isMobile ? "Créer" : "Créer un nouveau deck"}
@@ -125,10 +141,29 @@ const MyDecksPage = () => {
         </div>
       </div>
       
-      <div className="flex justify-end items-center mb-6">
+      {storageInfo && (
+        <div className="mb-6 bg-quaternary/10 rounded-lg p-3 text-sm">
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Espace utilisé:</span>
+            <span className="font-medium">{Math.round(storageInfo.usage / 1024 / 1024)}MB / {Math.round(storageInfo.quota / 1024 / 1024)}MB</span>
+          </div>
+          <div className="w-full bg-muted h-2 rounded-full mt-2">
+            <div 
+              className="h-full rounded-full bg-gradient-to-r from-primary to-tertiary" 
+              style={{ width: `${storageInfo.percentUsed}%` }}
+            ></div>
+          </div>
+        </div>
+      )}
+      
+      <div className="flex justify-between items-center mb-6">
         <div className="text-sm text-muted-foreground">
           {decks.length} deck{decks.length !== 1 ? "s" : ""}
         </div>
+        <Button variant="ghost" size="sm" className="text-sm">
+          <Filter className="h-4 w-4 mr-2" />
+          Filtrer
+        </Button>
       </div>
 
       {isLoading ? (
@@ -138,10 +173,14 @@ const MyDecksPage = () => {
         </div>
       ) : decks.length === 0 ? (
         <div className="text-center py-12 card-gradient-accent rounded-lg p-8">
-          <p className="text-muted-foreground mb-6">
+          <p className="text-muted-foreground mb-6 font-serif">
             Vous n'avez pas encore créé de decks.
           </p>
-          <Button asChild size="lg" className="animate-pulse-slow">
+          <Button 
+            asChild 
+            size="lg" 
+            className="animate-pulse-slow bg-gradient-to-r from-primary via-tertiary to-secondary hover:from-primary/90 hover:via-tertiary/90 hover:to-secondary/90"
+          >
             <Link to="/create">
               <Plus className="mr-2 h-4 w-4" />
               Créer votre premier deck
@@ -149,7 +188,7 @@ const MyDecksPage = () => {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {decks.map(deck => (
             <DeckCard 
               key={deck.id}
