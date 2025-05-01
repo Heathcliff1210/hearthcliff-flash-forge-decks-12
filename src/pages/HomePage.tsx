@@ -37,10 +37,10 @@ const HomePage = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/30 via-tertiary/20 to-secondary/30 py-20">
+      <section className="relative bg-gradient-to-r from-primary/20 via-background to-accent/20 py-20">
         <div className="container px-4 mx-auto flex flex-col items-center text-center">
           <span className="text-6xl mb-4">🎭</span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-tertiary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             CDS FLASHCARD-BASE
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-8">
@@ -48,13 +48,13 @@ const HomePage = () => {
             L'outil parfait pour mémoriser efficacement tous types de connaissances.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button asChild size="lg" className="bg-gradient-to-r from-primary to-tertiary hover:from-primary/90 hover:to-tertiary/90 animate-float">
+            <Button asChild size="lg" className="animate-float">
               <Link to="/create">
                 <Plus className="mr-2 h-4 w-4" />
                 Créer un deck
               </Link>
             </Button>
-            <Button variant="outline" asChild size="lg" className="border-tertiary/50 hover:bg-tertiary/10">
+            <Button variant="outline" asChild size="lg">
               <Link to="/explore">
                 <Globe className="mr-2 h-4 w-4" />
                 Explorer
@@ -68,11 +68,11 @@ const HomePage = () => {
       {/* Features Section */}
       <section className="py-16">
         <div className="container px-4 mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-tertiary via-secondary to-quaternary bg-clip-text text-transparent">Fonctionnalités exceptionnelles</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Fonctionnalités exceptionnelles</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-gradient-to-br from-background to-tertiary/10 border-primary/20 transition-transform hover:scale-105">
+            <Card className="bg-gradient-to-br from-background to-secondary/50 border-primary/20">
               <CardHeader>
-                <div className="mb-2 p-3 w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-tertiary/20 flex items-center justify-center">
+                <div className="mb-2 p-3 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <BookOpen className="h-6 w-6 text-primary" />
                 </div>
                 <CardTitle>Flashcards Multimédia</CardTitle>
@@ -85,9 +85,9 @@ const HomePage = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-background to-quaternary/10 border-primary/20 transition-transform hover:scale-105">
+            <Card className="bg-gradient-to-br from-background to-secondary/50 border-primary/20">
               <CardHeader>
-                <div className="mb-2 p-3 w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-quaternary/20 flex items-center justify-center">
+                <div className="mb-2 p-3 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <TrendingUp className="h-6 w-6 text-primary" />
                 </div>
                 <CardTitle>Organisation par Thèmes</CardTitle>
@@ -100,9 +100,9 @@ const HomePage = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-background to-secondary/10 border-primary/20 transition-transform hover:scale-105">
+            <Card className="bg-gradient-to-br from-background to-secondary/50 border-primary/20">
               <CardHeader>
-                <div className="mb-2 p-3 w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <div className="mb-2 p-3 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <Globe className="h-6 w-6 text-primary" />
                 </div>
                 <CardTitle>Partage Facile</CardTitle>
@@ -120,11 +120,11 @@ const HomePage = () => {
 
       {/* Recent Decks Section */}
       {recentDecks.length > 0 && (
-        <section className="py-16 bg-gradient-to-r from-secondary/30 via-background to-tertiary/20">
+        <section className="py-16 bg-secondary/30">
           <div className="container px-4 mx-auto">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">Decks récents</h2>
-              <Button variant="ghost" size="sm" asChild className="hover:bg-tertiary/10 hover:text-tertiary">
+              <h2 className="text-2xl font-bold">Decks récents</h2>
+              <Button variant="ghost" size="sm" asChild>
                 <Link to="/explore" className="flex items-center">
                   Voir tous les decks
                   <ChevronRightIcon className="ml-1 h-4 w-4" />
@@ -151,13 +151,13 @@ const HomePage = () => {
       )}
 
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-quaternary/20 via-background to-primary/20">
+      <section className="py-20 bg-gradient-to-r from-accent/20 via-background to-primary/20">
         <div className="container px-4 mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-tertiary via-quaternary to-primary bg-clip-text text-transparent">Prêt à créer vos propres flashcards?</h2>
+          <h2 className="text-3xl font-bold mb-6">Prêt à créer vos propres flashcards?</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             Commencez dès maintenant à créer vos propres decks de flashcards. C'est gratuit et ne nécessite pas de compte !
           </p>
-          <Button asChild size="lg" className="bg-gradient-to-r from-primary to-quaternary hover:from-primary/90 hover:to-quaternary/90 animate-pulse-slow">
+          <Button asChild size="lg" className="animate-pulse-slow">
             <Link to="/create" className="flex items-center">
               Commencer
               <ArrowRight className="ml-2 h-4 w-4" />

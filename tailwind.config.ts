@@ -74,10 +74,6 @@ export default {
 					pink: '#ff4088',
 					violet: '#a567e1',
 					yellow: '#ffcc33',
-					purple: '#9b87f5',
-					gold: '#ffc857',
-					coral: '#ff6b6b',
-					teal: '#4ecdc4',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
