@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { 
   BookOpen, 
@@ -8,7 +7,8 @@ import {
   ArrowLeft,
   Check,
   X,
-  Info
+  Info,
+  ChevronDown
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import FlashCard from "@/components/FlashCard";
 import FlashCardItem from "@/components/FlashCardItem";
@@ -49,6 +50,8 @@ const ThemePage = () => {
   const [showCardDialog, setShowCardDialog] = useState(false);
   const [showFrontAdditionalInfo, setShowFrontAdditionalInfo] = useState(false);
   const [showBackAdditionalInfo, setShowBackAdditionalInfo] = useState(false);
+  const [isDialogScrolledToBottom, setIsDialogScrolledToBottom] = useState(false);
+  const dialogContentRef = useRef<HTMLDivElement>(null);
 
   // New flashcard form
   const [newCard, setNewCard] = useState({
@@ -101,6 +104,27 @@ const ThemePage = () => {
     
     setIsLoading(false);
   }, [deckId, themeId, navigate, toast, user?.id]);
+
+  // Vérifier le défilement du contenu du dialogue
+  useEffect(() => {
+    if (showCardDialog && dialogContentRef.current) {
+      const checkScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = dialogContentRef.current!;
+        const isBottom = scrollHeight - scrollTop <= clientHeight + 20; // marge de 20px
+        setIsDialogScrolledToBottom(isBottom);
+      };
+      
+      const dialogContent = dialogContentRef.current;
+      dialogContent.addEventListener('scroll', checkScroll);
+      
+      // Vérifie l'état du défilement au chargement initial
+      checkScroll();
+      
+      return () => {
+        dialogContent.removeEventListener('scroll', checkScroll);
+      };
+    }
+  }, [showCardDialog]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
     const file = e.target.files?.[0];
@@ -275,6 +299,16 @@ const ThemePage = () => {
     }
   };
 
+  // Fonction pour défiler vers le bas du dialogue
+  const scrollToBottom = () => {
+    if (dialogContentRef.current) {
+      dialogContentRef.current.scrollTo({
+        top: dialogContentRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container px-4 py-8 flex items-center justify-center h-64">
@@ -412,237 +446,254 @@ const ThemePage = () => {
       
       {/* Add Card Dialog */}
       <Dialog open={showCardDialog} onOpenChange={setShowCardDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
             <DialogTitle>Ajouter une flashcard au thème {theme.title}</DialogTitle>
             <DialogDescription>
               Créez une nouvelle flashcard pour ce thème
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-            {/* Front of the card */}
-            <div className="space-y-4 border p-4 rounded-lg">
-              <h3 className="font-medium">Recto de la carte</h3>
-              
-              <div className="space-y-2">
-                <Label htmlFor="front-text">Texte</Label>
-                <Textarea
-                  id="front-text"
-                  placeholder="Ex: Définition, question, mot..."
-                  rows={3}
-                  value={newCard.front.text}
-                  onChange={(e) => setNewCard({
-                    ...newCard,
-                    front: { ...newCard.front, text: e.target.value },
-                  })}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="front-image">Image (optionnelle)</Label>
-                <Input
-                  id="front-image"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload(e, 'front')}
-                />
-                {newCard.front.image && (
-                  <div className="mt-2 relative w-full h-32 rounded-md overflow-hidden border">
-                    <img
-                      src={newCard.front.image}
-                      alt="Front side"
-                      className="w-full h-full object-contain"
-                    />
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 w-6 h-6 rounded-full"
-                      onClick={() => setNewCard({
-                        ...newCard,
-                        front: { ...newCard.front, image: undefined },
-                      })}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="front-audio">Audio (optionnel)</Label>
-                <Input
-                  id="front-audio"
-                  type="file"
-                  accept="audio/*"
-                  onChange={(e) => handleAudioUpload(e, 'front')}
-                />
-                {newCard.front.audio && (
-                  <div className="mt-2 relative">
-                    <audio className="w-full" controls>
-                      <source src={newCard.front.audio} />
-                      Votre navigateur ne supporte pas l'élément audio.
-                    </audio>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 right-2 w-6 h-6 rounded-full"
-                      onClick={() => setNewCard({
-                        ...newCard,
-                        front: { ...newCard.front, audio: undefined },
-                      })}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex items-center space-x-2 pt-2">
-                <Checkbox 
-                  id="show-front-additional-info" 
-                  checked={showFrontAdditionalInfo}
-                  onCheckedChange={(checked) => {
-                    setShowFrontAdditionalInfo(checked as boolean);
-                  }}
-                />
-                <label 
-                  htmlFor="show-front-additional-info" 
-                  className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Ajouter des informations supplémentaires
-                </label>
-              </div>
-
-              {showFrontAdditionalInfo && (
+          <ScrollArea className="flex-1 px-6 py-4 max-h-[70vh]" ref={dialogContentRef}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+              {/* Front of the card */}
+              <div className="space-y-4 border p-4 rounded-lg">
+                <h3 className="font-medium">Recto de la carte</h3>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="front-additional-info">Informations supplémentaires</Label>
+                  <Label htmlFor="front-text">Texte</Label>
                   <Textarea
-                    id="front-additional-info"
-                    placeholder="Notes, contexte ou détails complémentaires..."
+                    id="front-text"
+                    placeholder="Ex: Définition, question, mot..."
                     rows={3}
-                    value={newCard.front.additionalInfo}
+                    value={newCard.front.text}
                     onChange={(e) => setNewCard({
                       ...newCard,
-                      front: { ...newCard.front, additionalInfo: e.target.value },
+                      front: { ...newCard.front, text: e.target.value },
                     })}
                   />
                 </div>
-              )}
-            </div>
-            
-            {/* Back of the card */}
-            <div className="space-y-4 border p-4 rounded-lg">
-              <h3 className="font-medium">Verso de la carte</h3>
-              
-              <div className="space-y-2">
-                <Label htmlFor="back-text">Texte</Label>
-                <Textarea
-                  id="back-text"
-                  placeholder="Ex: Réponse, traduction..."
-                  rows={3}
-                  value={newCard.back.text}
-                  onChange={(e) => setNewCard({
-                    ...newCard,
-                    back: { ...newCard.back, text: e.target.value },
-                  })}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="back-image">Image (optionnelle)</Label>
-                <Input
-                  id="back-image"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload(e, 'back')}
-                />
-                {newCard.back.image && (
-                  <div className="mt-2 relative w-full h-32 rounded-md overflow-hidden border">
-                    <img
-                      src={newCard.back.image}
-                      alt="Back side"
-                      className="w-full h-full object-contain"
-                    />
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 w-6 h-6 rounded-full"
-                      onClick={() => setNewCard({
-                        ...newCard,
-                        back: { ...newCard.back, image: undefined },
-                      })}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="back-audio">Audio (optionnel)</Label>
-                <Input
-                  id="back-audio"
-                  type="file"
-                  accept="audio/*"
-                  onChange={(e) => handleAudioUpload(e, 'back')}
-                />
-                {newCard.back.audio && (
-                  <div className="mt-2 relative">
-                    <audio className="w-full" controls>
-                      <source src={newCard.back.audio} />
-                      Votre navigateur ne supporte pas l'élément audio.
-                    </audio>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 right-2 w-6 h-6 rounded-full"
-                      onClick={() => setNewCard({
-                        ...newCard,
-                        back: { ...newCard.back, audio: undefined },
-                      })}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex items-center space-x-2 pt-2">
-                <Checkbox 
-                  id="show-back-additional-info" 
-                  checked={showBackAdditionalInfo}
-                  onCheckedChange={(checked) => {
-                    setShowBackAdditionalInfo(checked as boolean);
-                  }}
-                />
-                <label 
-                  htmlFor="show-back-additional-info" 
-                  className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Ajouter des informations supplémentaires
-                </label>
-              </div>
-
-              {showBackAdditionalInfo && (
+                
                 <div className="space-y-2">
-                  <Label htmlFor="back-additional-info">Informations supplémentaires</Label>
+                  <Label htmlFor="front-image">Image (optionnelle)</Label>
+                  <Input
+                    id="front-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, 'front')}
+                  />
+                  {newCard.front.image && (
+                    <div className="mt-2 relative w-full h-32 rounded-md overflow-hidden border">
+                      <img
+                        src={newCard.front.image}
+                        alt="Front side"
+                        className="w-full h-full object-contain"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full"
+                        onClick={() => setNewCard({
+                          ...newCard,
+                          front: { ...newCard.front, image: undefined },
+                        })}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="front-audio">Audio (optionnel)</Label>
+                  <Input
+                    id="front-audio"
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => handleAudioUpload(e, 'front')}
+                  />
+                  {newCard.front.audio && (
+                    <div className="mt-2 relative">
+                      <audio className="w-full" controls>
+                        <source src={newCard.front.audio} />
+                        Votre navigateur ne supporte pas l'élément audio.
+                      </audio>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 right-2 w-6 h-6 rounded-full"
+                        onClick={() => setNewCard({
+                          ...newCard,
+                          front: { ...newCard.front, audio: undefined },
+                        })}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-2 pt-2">
+                  <Checkbox 
+                    id="show-front-additional-info" 
+                    checked={showFrontAdditionalInfo}
+                    onCheckedChange={(checked) => {
+                      setShowFrontAdditionalInfo(checked as boolean);
+                    }}
+                  />
+                  <label 
+                    htmlFor="show-front-additional-info" 
+                    className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Ajouter des informations supplémentaires
+                  </label>
+                </div>
+
+                {showFrontAdditionalInfo && (
+                  <div className="space-y-2">
+                    <Label htmlFor="front-additional-info">Informations supplémentaires</Label>
+                    <Textarea
+                      id="front-additional-info"
+                      placeholder="Notes, contexte ou détails complémentaires..."
+                      rows={3}
+                      value={newCard.front.additionalInfo}
+                      onChange={(e) => setNewCard({
+                        ...newCard,
+                        front: { ...newCard.front, additionalInfo: e.target.value },
+                      })}
+                    />
+                  </div>
+                )}
+              </div>
+              
+              {/* Back of the card */}
+              <div className="space-y-4 border p-4 rounded-lg">
+                <h3 className="font-medium">Verso de la carte</h3>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="back-text">Texte</Label>
                   <Textarea
-                    id="back-additional-info"
-                    placeholder="Notes, contexte ou détails complémentaires..."
+                    id="back-text"
+                    placeholder="Ex: Réponse, traduction..."
                     rows={3}
-                    value={newCard.back.additionalInfo}
+                    value={newCard.back.text}
                     onChange={(e) => setNewCard({
                       ...newCard,
-                      back: { ...newCard.back, additionalInfo: e.target.value },
+                      back: { ...newCard.back, text: e.target.value },
                     })}
                   />
                 </div>
-              )}
+                
+                <div className="space-y-2">
+                  <Label htmlFor="back-image">Image (optionnelle)</Label>
+                  <Input
+                    id="back-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, 'back')}
+                  />
+                  {newCard.back.image && (
+                    <div className="mt-2 relative w-full h-32 rounded-md overflow-hidden border">
+                      <img
+                        src={newCard.back.image}
+                        alt="Back side"
+                        className="w-full h-full object-contain"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full"
+                        onClick={() => setNewCard({
+                          ...newCard,
+                          back: { ...newCard.back, image: undefined },
+                        })}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="back-audio">Audio (optionnel)</Label>
+                  <Input
+                    id="back-audio"
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => handleAudioUpload(e, 'back')}
+                  />
+                  {newCard.back.audio && (
+                    <div className="mt-2 relative">
+                      <audio className="w-full" controls>
+                        <source src={newCard.back.audio} />
+                        Votre navigateur ne supporte pas l'élément audio.
+                      </audio>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 right-2 w-6 h-6 rounded-full"
+                        onClick={() => setNewCard({
+                          ...newCard,
+                          back: { ...newCard.back, audio: undefined },
+                        })}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-2 pt-2">
+                  <Checkbox 
+                    id="show-back-additional-info" 
+                    checked={showBackAdditionalInfo}
+                    onCheckedChange={(checked) => {
+                      setShowBackAdditionalInfo(checked as boolean);
+                    }}
+                  />
+                  <label 
+                    htmlFor="show-back-additional-info" 
+                    className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Ajouter des informations supplémentaires
+                  </label>
+                </div>
+
+                {showBackAdditionalInfo && (
+                  <div className="space-y-2">
+                    <Label htmlFor="back-additional-info">Informations supplémentaires</Label>
+                    <Textarea
+                      id="back-additional-info"
+                      placeholder="Notes, contexte ou détails complémentaires..."
+                      rows={3}
+                      value={newCard.back.additionalInfo}
+                      onChange={(e) => setNewCard({
+                        ...newCard,
+                        back: { ...newCard.back, additionalInfo: e.target.value },
+                      })}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </ScrollArea>
           
-          <DialogFooter>
+          {/* Indicateur de défilement si nécessaire */}
+          {!isDialogScrolledToBottom && (
+            <div className="flex justify-center pb-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground hover:text-foreground w-full flex items-center justify-center" 
+                onClick={scrollToBottom}
+              >
+                <ChevronDown className="h-5 w-5 animate-bounce" />
+                <span className="ml-1">Défiler vers le bas</span>
+              </Button>
+            </div>
+          )}
+          
+          <DialogFooter className="p-6 pt-2 border-t">
             <Button variant="outline" onClick={() => setShowCardDialog(false)}>
               Annuler
             </Button>
