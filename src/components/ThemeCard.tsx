@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Layers, ArrowRight, Edit, Trash2, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 import { updateTheme, deleteTheme, Theme } from "@/lib/localStorage";
+import ThemeImageUploader from "./ThemeImageUploader";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface ThemeCardProps {
   id: string;
@@ -38,7 +40,9 @@ const ThemeCard = ({
   const [editingTheme, setEditingTheme] = useState({
     title,
     description,
+    coverImage
   });
+  const isMobile = useIsMobile();
 
   const handleUpdate = () => {
     if (!editingTheme.title.trim()) {
@@ -54,6 +58,7 @@ const ThemeCard = ({
       const updated = updateTheme(id, {
         title: editingTheme.title.trim(),
         description: editingTheme.description.trim(),
+        coverImage: editingTheme.coverImage
       });
 
       if (updated) {
@@ -170,70 +175,82 @@ const ThemeCard = ({
               {description}
             </CardDescription>
           </CardHeader>
-          <CardFooter className="flex justify-between p-4 pt-0">
-            {!coverImage && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Layers className="h-3 w-3" />
-                <span>{cardCount} cartes</span>
-              </div>
-            )}
-            <div className="ml-auto flex items-center gap-1 text-xs text-primary hover:text-primary/80">
-              <span>Explorer</span>
-              <ArrowRight className="h-3 w-3" />
-            </div>
-          </CardFooter>
         </Link>
       </Card>
 
+      {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
+        <DialogContent className={isMobile ? "mobile-form-container p-4 max-w-sm" : "max-w-md"}>
           <DialogHeader>
             <DialogTitle>Modifier le thème</DialogTitle>
+            <DialogDescription>
+              Modifiez les détails de votre thème
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          
+          <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="edit-title">Titre</Label>
+              <Label htmlFor="title">Titre</Label>
               <Input
-                id="edit-title"
+                id="title"
                 value={editingTheme.title}
-                onChange={(e) => setEditingTheme({ ...editingTheme, title: e.target.value })}
+                onChange={(e) => setEditingTheme({
+                  ...editingTheme,
+                  title: e.target.value,
+                })}
               />
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
-                id="edit-description"
-                rows={3}
+                id="description"
                 value={editingTheme.description}
-                onChange={(e) => setEditingTheme({ ...editingTheme, description: e.target.value })}
+                onChange={(e) => setEditingTheme({
+                  ...editingTheme,
+                  description: e.target.value,
+                })}
+                rows={3}
               />
             </div>
+            
+            <ThemeImageUploader 
+              currentImage={editingTheme.coverImage}
+              onChange={(image) => setEditingTheme({
+                ...editingTheme,
+                coverImage: image
+              })}
+            />
           </div>
+          
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="mr-2">
               Annuler
             </Button>
-            <Button onClick={handleUpdate}>
-              <Save className="mr-2 h-4 w-4" />
+            <Button onClick={handleUpdate} className="gap-1">
+              <Save className="h-4 w-4" />
               Enregistrer
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
+        <DialogContent className={isMobile ? "mobile-form-container p-4 max-w-sm" : "max-w-md"}>
           <DialogHeader>
             <DialogTitle>Supprimer le thème</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer le thème "{title}" ? Cette action est irréversible.
+              Êtes-vous sûr de vouloir supprimer ce thème ? Cette action est irréversible.
             </DialogDescription>
           </DialogHeader>
+          
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="mr-2">
               Annuler
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
+              <Trash2 className="h-4 w-4 mr-1" />
               Supprimer
             </Button>
           </DialogFooter>

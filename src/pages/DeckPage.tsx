@@ -29,6 +29,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import FlashCard from "@/components/FlashCard";
 import ThemeCard from "@/components/ThemeCard";
 import FlashCardItem from "@/components/FlashCardItem";
+import ThemeImageUploader from "@/components/ThemeImageUploader";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import { 
   getDeck, 
@@ -56,6 +58,7 @@ const DeckPage = () => {
   const [showCardDialog, setShowCardDialog] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const isMobile = useIsMobile();
   
   const [newTheme, setNewTheme] = useState({
     title: "",
@@ -270,7 +273,7 @@ const DeckPage = () => {
       
       toast({
         title: "Thème créé",
-        description: "Le th��me a été ajouté avec succès",
+        description: "Le thme a été ajouté avec succès",
       });
     } catch (error) {
       console.error("Error creating theme:", error);
@@ -661,7 +664,7 @@ const DeckPage = () => {
       </Tabs>
       
       <Dialog open={showThemeDialog} onOpenChange={setShowThemeDialog}>
-        <DialogContent>
+        <DialogContent className={isMobile ? "mobile-form-container p-4 max-w-sm" : "max-w-md"}>
           <DialogHeader>
             <DialogTitle>Ajouter un thème</DialogTitle>
             <DialogDescription>
@@ -669,7 +672,7 @@ const DeckPage = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="theme-title">Titre</Label>
               <Input
@@ -691,28 +694,14 @@ const DeckPage = () => {
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="theme-image">Image de couverture (optionnelle)</Label>
-              <Input
-                id="theme-image"
-                type="file"
-                accept="image/*"
-                onChange={handleThemeImageUpload}
-              />
-              {newTheme.coverImage && (
-                <div className="mt-2 relative w-full h-32 rounded-md overflow-hidden border">
-                  <img
-                    src={newTheme.coverImage}
-                    alt="Theme cover"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-            </div>
+            <ThemeImageUploader
+              currentImage={newTheme.coverImage}
+              onChange={(image) => setNewTheme({ ...newTheme, coverImage: image })}
+            />
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowThemeDialog(false)}>
+            <Button variant="outline" onClick={() => setShowThemeDialog(false)} className="mr-2">
               Annuler
             </Button>
             <Button onClick={createNewTheme}>
