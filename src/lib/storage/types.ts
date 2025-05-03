@@ -9,6 +9,8 @@ export interface User {
   email: string;
   password: string;
   createdAt: number;
+  avatar?: string; // L'avatar en base64 (pour l'affichage)
+  avatarId?: string; // Référence à l'avatar stocké dans IndexedDB
 }
 
 export interface Deck {

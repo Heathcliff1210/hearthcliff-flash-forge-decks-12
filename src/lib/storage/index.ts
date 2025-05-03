@@ -11,3 +11,4 @@ export * from './mediaStorage';
 export * from './deckSharingStorage';
 export * from './migrationTools';
 export * from './sampleData';
+export * from './dataExportImport';

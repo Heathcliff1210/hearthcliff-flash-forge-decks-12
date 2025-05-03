@@ -3,6 +3,7 @@
 import { User } from './types';
 import { getLocalStorageItem, setLocalStorageItem } from './utils';
 import { generateId } from './types';
+import { blobToBase64, getImage } from '../indexedDBStorage';
 
 /**
  * Create a new user account
@@ -33,7 +34,30 @@ export function getUser(): User | null {
   if (!sessionId) return null;
   
   const users = getLocalStorageItem('users') || {};
-  return users[sessionId] || null;
+  const user = users[sessionId] || null;
+  
+  // Charger l'avatar si présent
+  if (user && user.avatarId) {
+    loadUserAvatar(user);
+  }
+  
+  return user;
+}
+
+/**
+ * Load user avatar from IndexedDB
+ */
+async function loadUserAvatar(user: User): Promise<void> {
+  if (!user || !user.avatarId) return;
+  
+  try {
+    const imageBlob = await getImage(user.avatarId);
+    if (imageBlob) {
+      user.avatar = await blobToBase64(imageBlob);
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement de l\'avatar:', error);
+  }
 }
 
 /**
@@ -44,6 +68,26 @@ export function setUser(user: User): void {
   users[user.id] = user;
   setLocalStorageItem('users', users);
   setLocalStorageItem('sessionId', user.id);
+}
+
+/**
+ * Update user information
+ */
+export function updateUser(updates: Partial<User>): User | null {
+  const currentUser = getUser();
+  if (!currentUser) return null;
+  
+  const users = getLocalStorageItem('users') || {};
+  
+  const updatedUser = {
+    ...currentUser,
+    ...updates
+  };
+  
+  users[currentUser.id] = updatedUser;
+  setLocalStorageItem('users', users);
+  
+  return updatedUser;
 }
 
 /**
