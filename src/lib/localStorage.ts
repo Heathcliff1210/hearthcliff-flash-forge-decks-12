@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import {
   storeImage,
@@ -970,8 +971,8 @@ export function updateDeckFromJson(exportData: SharedDeckExport): boolean {
   
   // Chercher le deck importé par son originalId
   const importedDeck = Object.values(decks).find(
-    (deck: Deck) => deck.isShared && deck.originalId === exportData.originalId
-  );
+    (deck: any) => deck.isShared && deck.originalId === exportData.originalId
+  ) as Deck | undefined;
   
   if (!importedDeck) return false;
   
@@ -1226,3 +1227,4 @@ export function generateSampleData() {
     }
   });
 }
+
