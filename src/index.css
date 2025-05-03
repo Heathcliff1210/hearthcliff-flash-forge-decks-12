@@ -155,9 +155,12 @@ html, body {
 
 /* Style pour les formulaires sur mobile */
 .mobile-form-container {
-  @apply px-2 py-2 max-w-full overflow-y-auto;
+  @apply px-2 py-2 max-w-full;
+  height: auto;
   max-height: calc(100dvh - 150px);
-  padding-bottom: 60px;
+  overflow-y: auto;
+  padding-bottom: 70px;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Style pour les champs de formulaire sur mobile */
