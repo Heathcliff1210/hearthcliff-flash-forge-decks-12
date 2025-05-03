@@ -1,7 +1,7 @@
 import { 
   Deck, 
   Flashcard, 
-  Theme, 
+  Theme,
   getThemes
 } from './localStorage';
 
@@ -355,13 +355,12 @@ export const deleteMedia = (id: string): Promise<boolean> => {
 export const migrateLocalStorageToIndexedDB = async (): Promise<boolean> => {
   try {
     // Importer les fonctions de localStorage
-    const { getDecks, getFlashcards, getThemes, getUser } = await import('./localStorage');
+    const { getDecks, getFlashcards } = await import('./localStorage');
     
     // Récupérer toutes les données de localStorage
     const decks = getDecks();
     const flashcards = getFlashcards();
-    const themes = getThemes();
-    const user = getUser();
+    const themes = getThemes(); // Utilisation de la fonction getThemes maintenant disponible
     
     console.log(`Migration: ${decks.length} decks, ${flashcards.length} flashcards, ${themes.length} thèmes`);
     
@@ -378,11 +377,6 @@ export const migrateLocalStorageToIndexedDB = async (): Promise<boolean> => {
     // Stocker les themes dans IndexedDB
     for (const theme of themes) {
       await addTheme(theme);
-    }
-    
-    // Stocker l'utilisateur dans IndexedDB si défini
-    if (user) {
-      await addItem(STORES.USERS, user);
     }
     
     return true;

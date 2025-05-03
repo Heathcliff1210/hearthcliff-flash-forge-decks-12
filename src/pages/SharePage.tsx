@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +35,7 @@ const SharePage = () => {
     
     try {
       const days = parseInt(expiryDays, 10);
-      const code = createShareCode(selectedDeck, days);
+      const code = createShareCode(selectedDeck, days); // Correction : passage d'un nombre au lieu d'une chaîne
       const url = `${window.location.origin}/import/${code}`;
       
       setShareCode(code);

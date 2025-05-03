@@ -1,4 +1,3 @@
-
 // Corrigeons le problème dans HomePage.tsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -103,7 +102,7 @@ const HomePage = () => {
                       cardCount={0}
                       coverImage={deck.coverImage}
                       isPublic={deck.isPublic}
-                      authorEmail={user.email || "Utilisateur"}
+                      author={user?.username || "Utilisateur"} // Utilisation de author au lieu de authorEmail
                       tags={deck.tags}
                     />
                   ))
@@ -152,7 +151,7 @@ const HomePage = () => {
                     cardCount={0}
                     coverImage={deck.coverImage}
                     isPublic={deck.isPublic}
-                    authorEmail="Contributeur"
+                    author="Contributeur" // Utilisation de author au lieu de authorEmail
                     tags={deck.tags}
                   />
                 ))

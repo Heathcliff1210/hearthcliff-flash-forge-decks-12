@@ -12,6 +12,7 @@ import {
   Clock,
   Star,
   X,
+  Check, // Importation du composant Check
 } from "lucide-react";
 import { getDecks, Deck, getUser } from "@/lib/localStorage";
 import { Button } from "@/components/ui/button";

@@ -95,7 +95,7 @@ const EditDeckPage = () => {
     setIsLoading(false);
   }, [id, navigate, toast]);
   
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!id) return;
     
     if (!title.trim()) {
@@ -122,6 +122,11 @@ const EditDeckPage = () => {
           title: "Deck mis à jour",
           description: "Les modifications ont été enregistrées avec succès",
         });
+        
+        // Mettre à jour le deck publié si nécessaire
+        if (updatedDeck && updatedDeck.isPublished) {
+          updatePublishedDeck(updatedDeck.id);
+        }
         
         navigate(`/deck/${id}`);
       }
@@ -204,42 +209,26 @@ const EditDeckPage = () => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
   
-  const handlePublishDeck = async () => {
+  const handlePublish = () => {
     if (!deck) return;
-
-    setIsPublishing(true);
-    setPublishError(null);
-    try {
-      const published = await publishDeck(deck);
-      if (published) {
-        toast({
-          title: "Deck publié",
-          description: "Votre deck est maintenant visible dans l'explorateur",
-        });
-        
-        const updatedDeck = getDeck(id || '');
-        if (updatedDeck) {
-          setDeck(updatedDeck);
-        }
-      } else {
-        setPublishError("Impossible de publier le deck. Veuillez réessayer.");
-        toast({
-          title: "Erreur",
-          description: "Impossible de publier le deck",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Publication error:", error);
-      setPublishError("Une erreur technique s'est produite. Veuillez réessayer.");
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la publication",
-        variant: "destructive",
-      });
-    } finally {
-      setIsPublishing(false);
+    
+    if (deck.isPublished) {
+      // Dépublier le deck
+      unpublishDeck(deck.id);
+    } else {
+      // Publier le deck
+      publishDeck(deck.id);
     }
+    
+    // Recharger le deck
+    loadDeck();
+    
+    toast({
+      title: deck.isPublished ? "Deck dépublié" : "Deck publié",
+      description: deck.isPublished 
+        ? "Ce deck n'est plus visible publiquement" 
+        : "Ce deck est maintenant visible publiquement",
+    });
   };
 
   const handleUnpublishDeck = async () => {
@@ -281,7 +270,7 @@ const EditDeckPage = () => {
     if (!deck) return;
 
     try {
-      const updated = await updatePublishedDeck(deck);
+      const updated = await updatePublishedDeck(deck.id);
       if (updated) {
         toast({
           title: "Deck mis à jour",
@@ -345,7 +334,7 @@ const EditDeckPage = () => {
         <div className="flex gap-2">
           {!deck?.isPublished ? (
             <Button 
-              onClick={handlePublishDeck} 
+              onClick={handlePublish} 
               disabled={isPublishing}
               className="bg-green-500 hover:bg-green-600"
             >

@@ -10,10 +10,12 @@ export interface DeckCardProps {
   description: string;
   coverImage?: string;
   tags: string[];
-  author: string;
+  authorEmail?: string; // Ajout de authorEmail comme optionnel
+  author?: string;      // Garder author pour la compatibilité
   cardCount: number;
   isPublic: boolean;
   isShared?: boolean;
+  onShare?: () => void; // Ajout de onShare comme optionnel
 }
 
 const DeckCard = ({
@@ -23,10 +25,15 @@ const DeckCard = ({
   coverImage,
   tags,
   author,
+  authorEmail,
   cardCount,
   isPublic,
-  isShared
+  isShared,
+  onShare
 }: DeckCardProps) => {
+  // Utiliser authorEmail ou author (pour compatibilité)
+  const displayedAuthor = authorEmail || author || "Anonyme";
+  
   return (
     <Card className="overflow-hidden flex flex-col h-full">
       <div className="aspect-video relative">
@@ -75,18 +82,43 @@ const DeckCard = ({
         )}
         
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{author}</span>
+          <span>{displayedAuthor}</span>
           <span>{cardCount} carte{cardCount !== 1 ? "s" : ""}</span>
         </div>
       </CardContent>
       
-      <CardFooter>
-        <Button asChild variant="default" className="w-full">
+      <CardFooter className="flex">
+        <Button asChild variant="default" className="flex-1">
           <Link to={`/deck/${id}`}>
             Explorer
             <ExternalLink className="ml-2 h-4 w-4" />
           </Link>
         </Button>
+        
+        {onShare && (
+          <Button 
+            onClick={onShare} 
+            variant="outline" 
+            className="ml-2"
+            size="icon"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+              <polyline points="16 6 12 2 8 6" />
+              <line x1="12" y1="2" x2="12" y2="15" />
+            </svg>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

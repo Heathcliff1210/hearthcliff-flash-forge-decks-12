@@ -1027,35 +1027,132 @@ export function updateDeckFromJson(exportData: SharedDeckExport): boolean {
 }
 
 // Fonctions manquantes selon les erreurs
-export function getSharedImportedDecks(): {localDeckId: string}[] {
-  // Implémentation temporaire pour résoudre l'erreur
-  return [];
+export function getThemes(): Theme[] {
+  const themes = getLocalStorageItem('themes') || {};
+  return Object.values(themes) as Theme[];
+}
+
+// Implémentation de la fonction manquante migrateBase64MediaToIndexedDB
+export async function migrateBase64MediaToIndexedDB(
+  imageBase64?: string,
+  audioBase64?: string
+): Promise<{ imageId?: string; audioId?: string }> {
+  const result: { imageId?: string; audioId?: string } = {};
+  
+  try {
+    // Traiter l'image si présente
+    if (isBase64String(imageBase64)) {
+      const imageId = generateMediaId('img');
+      const contentType = imageBase64!.split(';')[0].split(':')[1];
+      const imageBlob = base64ToBlob(imageBase64!, contentType);
+      const success = await storeImage(imageId, imageBlob);
+      
+      if (success) {
+        result.imageId = imageId;
+      }
+    }
+    
+    // Traiter l'audio si présent
+    if (isBase64String(audioBase64)) {
+      const audioId = generateMediaId('aud');
+      const contentType = audioBase64!.split(';')[0].split(':')[1];
+      const audioBlob = base64ToBlob(audioBase64!, contentType);
+      const success = await storeAudio(audioId, audioBlob);
+      
+      if (success) {
+        result.audioId = audioId;
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors de la migration des médias:', error);
+  }
+  
+  return result;
+}
+
+// Correction des fonctions utilisant des tableaux
+export function getSharedImportedDecks(): { localDeckId: string }[] {
+  const decks = getDecks();
+  return decks
+    .filter(deck => deck.isShared && deck.originalId)
+    .map(deck => ({ localDeckId: deck.id }));
+}
+
+// Correction pour les erreurs de type unknown
+export function createShareCode(deckId: string, expiryDays: number = 7): string {
+  const deck = getDeck(deckId);
+  if (!deck) throw new Error(`Deck not found: ${deckId}`);
+  
+  // Création simple d'un code de partage (dans une vraie app, un système plus sécurisé serait utilisé)
+  const code = `share_${deckId}_${Date.now()}_${expiryDays}`;
+  
+  // Stocker le code dans localStorage avec sa date d'expiration
+  const shareCodes = getLocalStorageItem('shareCodes') || {};
+  shareCodes[code] = {
+    deckId,
+    expiryDate: Date.now() + (expiryDays * 24 * 60 * 60 * 1000)
+  };
+  setLocalStorageItem('shareCodes', shareCodes);
+  
+  return code;
 }
 
 export function getSharedDeck(code: string): Deck | null {
-  // Implémentation temporaire pour résoudre l'erreur
-  return null;
-}
-
-export function createShareCode(deckId: string): string {
-  // Implémentation temporaire pour résoudre l'erreur
-  return '';
+  const shareCodes = getLocalStorageItem('shareCodes') || {};
+  const shareInfo = shareCodes[code];
+  
+  if (!shareInfo) return null;
+  
+  // Vérifier si le code a expiré
+  if (shareInfo.expiryDate < Date.now()) {
+    // Suppression du code expiré
+    delete shareCodes[code];
+    setLocalStorageItem('shareCodes', shareCodes);
+    return null;
+  }
+  
+  // Récupérer le deck
+  return getDeck(shareInfo.deckId);
 }
 
 export function publishDeck(deckId: string): boolean {
-  // Implémentation temporaire pour résoudre l'erreur
+  const deck = getDeck(deckId);
+  if (!deck) return false;
+  
+  updateDeck(deckId, { 
+    isPublic: true,
+    isPublished: true
+  });
+  
   return true;
 }
 
 export function unpublishDeck(deckId: string): boolean {
-  // Implémentation temporaire pour résoudre l'erreur
+  const deck = getDeck(deckId);
+  if (!deck) return false;
+  
+  updateDeck(deckId, { 
+    isPublic: false,
+    isPublished: false
+  });
+  
   return true;
 }
 
 export function updatePublishedDeck(deckId: string): boolean {
-  // Implémentation temporaire pour résoudre l'erreur
-  return true;
+  const deck = getDeck(deckId);
+  if (!deck) return false;
+  
+  // Dans une vraie app, cela pourrait propager les mises à jour vers un serveur
+  if (deck.isPublished) {
+    updateDeck(deckId, { updatedAt: Date.now() });
+    return true;
+  }
+  
+  return false;
 }
+
+// ... keep existing code
 
 // FONCTION DE GÉNÉRATION DE DONNÉES D'EXEMPLE
 export function generateSampleData() {
