@@ -1099,7 +1099,7 @@ export function createShareCode(deckId: string, expiryDays: number = 7): string 
 
 export function getSharedDeck(code: string): Deck | null {
   const shareCodes = getLocalStorageItem('shareCodes') || {};
-  const shareInfo = shareCodes[code];
+  const shareInfo = shareCodes[code] as { deckId: string; expiryDate: number } | undefined;
   
   if (!shareInfo) return null;
   
@@ -1152,7 +1152,7 @@ export function updatePublishedDeck(deckId: string): boolean {
   return false;
 }
 
-// ... keep existing code
+// ... keep existing code (till end of file)
 
 // FONCTION DE GÉNÉRATION DE DONNÉES D'EXEMPLE
 export function generateSampleData() {

@@ -313,9 +313,9 @@ const ExplorePage = () => {
       </Tabs>
       
       <ShareDeckDialog 
-        isOpen={isShareDialogOpen}
-        onClose={() => setIsShareDialogOpen(false)}
-        deckId={selectedDeckId}
+        open={isShareDialogOpen}
+        onOpenChange={() => setIsShareDialogOpen(false)}
+        deckId={selectedDeckId || ""}
       />
     </div>
   );

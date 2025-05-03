@@ -58,6 +58,29 @@ const EditDeckPage = () => {
   const [isUnpublishing, setIsUnpublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
+  // Function to load deck data
+  const loadDeck = () => {
+    if (!id) return;
+    
+    const deckData = getDeck(id);
+    if (!deckData) {
+      toast({
+        title: "Deck introuvable",
+        description: "Le deck que vous cherchez n'existe pas",
+        variant: "destructive",
+      });
+      navigate("/");
+      return;
+    }
+    
+    setDeck(deckData);
+    setTitle(deckData.title);
+    setDescription(deckData.description);
+    setIsPublic(deckData.isPublic);
+    setCoverImage(deckData.coverImage);
+    setTags(deckData.tags || []);
+  };
+
   useEffect(() => {
     if (!id) return;
     

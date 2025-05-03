@@ -12,6 +12,7 @@ export interface ShareDeckDialogProps {
   isOpen?: boolean; // Compatible avec d'anciennes versions
   open?: boolean;    // Nouvelle propriété
   onOpenChange?: (open: boolean) => void;
+  onClose?: () => void; // Pour compatibilité avec le code existant
   deckId: string;
 }
 
@@ -19,6 +20,7 @@ const ShareDeckDialog: React.FC<ShareDeckDialogProps> = ({
   isOpen,
   open,
   onOpenChange,
+  onClose,
   deckId
 }) => {
   const [expiryDays, setExpiryDays] = useState<string>("7");
@@ -29,6 +31,15 @@ const ShareDeckDialog: React.FC<ShareDeckDialogProps> = ({
   
   // Utiliser open ou isOpen pour assurer la compatibilité
   const dialogOpen = open !== undefined ? open : isOpen;
+  
+  // Gestionnaire de changement compatible avec onClose et onOpenChange
+  const handleOpenChange = (newState: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(newState);
+    } else if (!newState && onClose) {
+      onClose();
+    }
+  };
   
   const generateCode = () => {
     try {
@@ -76,7 +87,7 @@ const ShareDeckDialog: React.FC<ShareDeckDialogProps> = ({
   };
   
   return (
-    <Dialog open={dialogOpen} onOpenChange={onOpenChange}>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Partager ce deck</DialogTitle>
