@@ -1,6 +1,6 @@
 
 // Deck management functionality
-import { Deck, generateId } from './types';
+import { Deck, generateId, SharedDeckExport } from './types';
 import { getLocalStorageItem, setLocalStorageItem, isBase64String } from './utils';
 import { getUser } from './userStorage';
 import { getFlashcardsByDeck } from './flashcardStorage';
