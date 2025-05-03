@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,11 +10,11 @@ import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import ProfileAvatar from "@/components/ProfileAvatar";
-import { getProfile, updateProfile, resetUserData } from "@/lib/localStorage";
+import { getProfile, updateProfile, resetUserData, logout } from "@/lib/localStorage";
 import { Loader2, Save, RefreshCw, AlertTriangle, User } from "lucide-react";
 import DataImportExport from "@/components/DataImportExport";
 import StorageMigrationTool from "@/components/StorageMigrationTool";
-import { hasSession, logout } from "@/lib/sessionManager";
+import { hasSession } from "@/lib/sessionManager";
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const ProfilePage = () => {
