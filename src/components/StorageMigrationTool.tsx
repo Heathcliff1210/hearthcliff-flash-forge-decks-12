@@ -87,7 +87,7 @@ const StorageMigrationTool = () => {
       console.error('Erreur lors du nettoyage:', error);
       toast({
         title: "Erreur de nettoyage",
-        description: "Une erreur est survenue lors du nettoyage.",
+        description: "Une erreur est survenue lors du nettoyage des données.",
         variant: "destructive"
       });
       setIsCleaning(false);

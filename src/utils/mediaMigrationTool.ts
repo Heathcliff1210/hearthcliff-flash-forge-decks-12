@@ -1,7 +1,13 @@
 
 import { getFlashcards, updateFlashcard, migrateExistingMediaToIndexedDB } from "@/lib/localStorage";
-import { isBase64String } from "@/lib/localStorage"; // Ajout de l'import correct
 import { toast } from "@/hooks/use-toast";
+
+// Fonction interne pour vérifier si une chaîne est en base64
+const isBase64String = (str: string | undefined): boolean => {
+  if (!str) return false;
+  // Vérifier si la chaîne commence par "data:" (format Data URL)
+  return str.startsWith('data:');
+};
 
 /**
  * Fonction utilitaire pour migrer tous les médias des flashcards vers IndexedDB
