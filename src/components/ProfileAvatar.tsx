@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Upload, User as UserIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { base64ToBlob, blobToBase64, storeImage, generateMediaId } from "@/lib/indexedDBStorage";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ProfileAvatarProps {
   username: string;
@@ -106,15 +112,24 @@ const ProfileAvatar = ({
         )}
       </Avatar>
       
-      <Button
-        type="button"
-        variant="secondary"
-        size="icon"
-        className={`${buttonSizeClass[size]} absolute bottom-0 right-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md`}
-        onClick={triggerFileUpload}
-      >
-        <Upload className="h-3/5 w-3/5" />
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              className={`${buttonSizeClass[size]} absolute bottom-0 right-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md`}
+              onClick={triggerFileUpload}
+            >
+              <Upload className="h-3/5 w-3/5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Changer l'avatar</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       
       <input
         ref={fileInputRef}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { getUser, updateUser } from "@/lib/localStorage";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import StorageMigrationTool from "@/components/StorageMigrationTool";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import DataImportExport from "@/components/DataImportExport";
+
+// Fix the import for the logout function
+import { logout } from "@/lib/storage/userStorage";
 
 const ProfilePage = () => {
   const { toast } = useToast();

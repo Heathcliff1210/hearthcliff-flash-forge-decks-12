@@ -1,4 +1,3 @@
-
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,6 +12,7 @@ import { Link, useLocation } from "react-router-dom";
 import React from "react";
 import { BookOpen, Lightbulb, Settings, Share2, TrendingUp, Folder } from "lucide-react";
 import { hasSession } from "@/lib/sessionManager";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface NavItem {
   title: string;
@@ -73,59 +73,61 @@ export function AppNavigationMenu() {
   }
   
   return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger className="bg-transparent">Étudier</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              {studyResources.map((resource) => (
-                <ListItem
-                  key={resource.title}
-                  title={resource.title}
-                  href={resource.href}
-                  icon={resource.icon}
-                  isActive={location.pathname === resource.href}
-                >
-                  {resource.description}
-                </ListItem>
-              ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        
-        <NavigationMenuItem>
-          <NavigationMenuTrigger className="bg-transparent">Ressources</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px]">
-              {resourcesItems.map((resource) => (
-                <ListItem
-                  key={resource.title}
-                  title={resource.title}
-                  href={resource.href}
-                  icon={resource.icon}
-                  isActive={location.pathname === resource.href}
-                >
-                  {resource.description}
-                </ListItem>
-              ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        
-        <NavigationMenuItem>
-          <Link to="/create">
-            <NavigationMenuLink className={cn(
-              navigationMenuTriggerStyle(), 
-              "bg-transparent",
-              location.pathname === "/create" && "bg-accent text-accent-foreground"
-            )}>
-              Créer
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+    <TooltipProvider>
+      <NavigationMenu>
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className="bg-transparent">Étudier</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                {studyResources.map((resource) => (
+                  <ListItem
+                    key={resource.title}
+                    title={resource.title}
+                    href={resource.href}
+                    icon={resource.icon}
+                    isActive={location.pathname === resource.href}
+                  >
+                    {resource.description}
+                  </ListItem>
+                ))}
+              </ul>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className="bg-transparent">Ressources</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px]">
+                {resourcesItems.map((resource) => (
+                  <ListItem
+                    key={resource.title}
+                    title={resource.title}
+                    href={resource.href}
+                    icon={resource.icon}
+                    isActive={location.pathname === resource.href}
+                  >
+                    {resource.description}
+                  </ListItem>
+                ))}
+              </ul>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          
+          <NavigationMenuItem>
+            <Link to="/create">
+              <NavigationMenuLink className={cn(
+                navigationMenuTriggerStyle(), 
+                "bg-transparent",
+                location.pathname === "/create" && "bg-accent text-accent-foreground"
+              )}>
+                Créer
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
+    </TooltipProvider>
   );
 }
 
