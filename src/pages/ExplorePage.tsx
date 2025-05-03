@@ -1,4 +1,5 @@
 
+// Correction des imports dans ExplorePage.tsx
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +7,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { SearchIcon, Filter, X, FileUp } from "lucide-react";
 import DeckCard, { DeckCardProps } from "@/components/DeckCard";
-import { getDecks, getFlashcardsByDeck, Deck, getUser, getSharedImportedDecks } from "@/lib/localStorage";
+import { getDecks, getFlashcardsByDeck, Deck, getUser } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ShareDeckDialog from "@/components/ShareDeckDialog";
+
+// Implémentation temporaire car getSharedImportedDecks n'existe pas
+const getSharedImportedDecks = () => {
+  return [];
+};
 
 const ExplorePage = () => {
   const [decks, setDecks] = useState<DeckCardProps[]>([]);

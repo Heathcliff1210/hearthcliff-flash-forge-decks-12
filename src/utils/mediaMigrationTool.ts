@@ -1,5 +1,6 @@
 
-import { getFlashcards, updateFlashcard, isBase64String, migrateExistingMediaToIndexedDB } from "@/lib/localStorage";
+import { getFlashcards, updateFlashcard, migrateExistingMediaToIndexedDB } from "@/lib/localStorage";
+import { isBase64String } from "@/lib/localStorage"; // Ajout de l'import correct
 import { toast } from "@/hooks/use-toast";
 
 /**

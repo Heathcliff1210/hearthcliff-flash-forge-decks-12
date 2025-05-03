@@ -1,4 +1,9 @@
-import { Deck, Flashcard, Theme, User } from './localStorage';
+import { 
+  Deck, 
+  Flashcard, 
+  Theme, 
+  getThemes
+} from './localStorage';
 
 // Définition des constantes pour les stores IndexedDB
 const DB_NAME = 'cds-flashcard-db';

@@ -96,7 +96,7 @@ export const getDeck = async (id: string): Promise<Deck | null> => {
 };
 
 export const createDeck = async (deck: Omit<Deck, 'id' | 'createdAt' | 'updatedAt'>): Promise<Deck> => {
-  const now = new Date().toISOString();
+  const now = Date.now();
   const newDeck: Deck = {
     ...deck,
     id: `deck_${Date.now()}`,
@@ -128,7 +128,7 @@ export const updateDeck = async (id: string, deckData: Partial<Deck>): Promise<D
   const updatedDeck: Deck = {
     ...existingDeck,
     ...deckData,
-    updatedAt: new Date().toISOString(),
+    updatedAt: Date.now(),
   };
   
   if (useIndexedDB) {
@@ -183,7 +183,7 @@ export const getFlashcardsByDeck = async (deckId: string): Promise<Flashcard[]> 
 };
 
 export const createFlashcard = async (flashcard: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>): Promise<Flashcard> => {
-  const now = new Date().toISOString();
+  const now = Date.now();
   const newFlashcard: Flashcard = {
     ...flashcard,
     id: `card_${Date.now()}`,
@@ -228,7 +228,7 @@ export const updateFlashcard = async (id: string, cardData: Partial<Flashcard>):
   const updatedCard: Flashcard = {
     ...existingCard,
     ...cardData,
-    updatedAt: new Date().toISOString(),
+    updatedAt: Date.now(),
   };
   
   if (useIndexedDB) {
@@ -271,7 +271,7 @@ export const getThemesByDeck = async (deckId: string): Promise<Theme[]> => {
 };
 
 export const createTheme = async (theme: Omit<Theme, 'id' | 'createdAt' | 'updatedAt'>): Promise<Theme> => {
-  const now = new Date().toISOString();
+  const now = Date.now();
   const newTheme: Theme = {
     ...theme,
     id: `theme_${Date.now()}`,
@@ -316,7 +316,7 @@ export const updateTheme = async (id: string, themeData: Partial<Theme>): Promis
   const updatedTheme: Theme = {
     ...existingTheme,
     ...themeData,
-    updatedAt: new Date().toISOString(),
+    updatedAt: Date.now(),
   };
   
   if (useIndexedDB) {
