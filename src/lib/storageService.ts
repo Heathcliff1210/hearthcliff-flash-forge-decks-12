@@ -1,11 +1,9 @@
-
 import {
   Deck,
   Flashcard,
   Theme,
   User,
   getUser as getLocalUser,
-  setUser as setLocalUser,
   getDeck as getLocalDeck,
   getDecks as getLocalDecks,
   createDeck as createLocalDeck,
@@ -66,10 +64,6 @@ export const initStorage = async (): Promise<void> => {
 // Fonctions utilisateur (rester sur localStorage car données légères)
 export const getUser = (): User | null => {
   return getLocalUser();
-};
-
-export const setUser = (user: User): void => {
-  setLocalUser(user);
 };
 
 // Fonctions pour les decks (hybride)

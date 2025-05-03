@@ -1,209 +1,430 @@
 
-import { useState, useEffect } from 'react';
-import { getUser } from '@/lib/localStorage';
-import DeckCard from '@/components/DeckCard';
-import { Button } from '@/components/ui/button';
-import { Link, useLocation } from 'react-router-dom';
-import { Plus, RefreshCcw, Loader2, Filter } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { initStorage, getDecks } from '@/lib/storageService';
-import type { Deck } from '@/lib/localStorage';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  BookOpen,
+  ListFilter,
+  PlusIcon,
+  Search,
+  ChevronDown,
+  FileUp,
+  ArrowUpDown,
+  Clock,
+  Star,
+  X,
+} from "lucide-react";
+import { getDecks, Deck, getUser } from "@/lib/localStorage";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import DeckCard from "@/components/DeckCard";
+import ShareDeckDialog from "@/components/ShareDeckDialog";
+import { toast } from "@/hooks/use-toast";
 
 const MyDecksPage = () => {
   const [decks, setDecks] = useState<Deck[]>([]);
-  const [user, setUser] = useState(getUser());
-  const [isLoading, setIsLoading] = useState(true);
-  const location = useLocation();
-  const { toast } = useToast();
-  const isMobile = useIsMobile();
-  const [storageInfo, setStorageInfo] = useState<{ usage: number, quota: number, percentUsed: number } | null>(null);
-
-  const fetchDecks = async () => {
-    setIsLoading(true);
-    try {
-      const currentUser = getUser();
-      setUser(currentUser);
-      
-      const allDecks = await getDecks();
-      const userDecks = allDecks.filter(deck => deck.authorId === currentUser?.id);
-      
-      console.log('Fetching decks for user:', currentUser?.id);
-      console.log('Found decks:', userDecks.length);
-      
-      setDecks(userDecks);
-      
-      // Vérifier l'utilisation du stockage
-      if (window.navigator.storage && window.navigator.storage.estimate) {
-        const estimate = await window.navigator.storage.estimate();
-        const usage = estimate.usage || 0;
-        const quota = estimate.quota || 100 * 1024 * 1024; // 100 MB par défaut
-        const percentUsed = Math.round((usage / quota) * 100);
-        
-        setStorageInfo({ usage, quota, percentUsed });
-        console.log(`Utilisation du stockage: ${Math.round(usage / 1024 / 1024)}MB sur ${Math.round(quota / 1024 / 1024)}MB`);
-      }
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error fetching decks:', error);
-      setIsLoading(false);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger vos decks.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const refreshDecks = async () => {
-    setIsLoading(true);
-    
-    try {
-      const currentUser = getUser();
-      setUser(currentUser);
-      
-      const allDecks = await getDecks();
-      const userDecks = allDecks.filter(deck => deck.authorId === currentUser?.id);
-      
-      console.log('Refreshing decks for user:', currentUser?.id);
-      console.log('Found decks:', userDecks.length);
-      
-      setDecks(userDecks);
-      toast({
-        title: "Liste mise à jour",
-        description: `${userDecks.length} deck(s) trouvé(s)`,
-      });
-    } catch (error) {
-      console.error('Error refreshing decks:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'actualiser vos decks.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [favoriteDecks, setFavoriteDecks] = useState<Deck[]>([]);
+  const [filter, setFilter] = useState("");
+  const [sortMethod, setSortMethod] = useState<"date" | "alphabetical">("date");
+  const [tags, setTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [deckToShare, setDeckToShare] = useState<string | null>(null);
+  const user = getUser();
 
   useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        await initStorage();
-        await fetchDecks();
-      } catch (error) {
-        console.error('Error initializing storage:', error);
-        setIsLoading(false);
-        toast({
-          title: "Erreur d'initialisation",
-          description: "Impossible d'initialiser le stockage. Utilisation du stockage local uniquement.",
-          variant: "destructive"
-        });
-      }
-    };
-    
-    initializeApp();
+    loadDecks();
+    const interval = setInterval(loadDecks, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    fetchDecks();
-  }, [location.key]);
+    // Extraire tous les tags uniques des decks
+    const allTags: string[] = [];
+    decks.forEach((deck) => {
+      deck.tags.forEach((tag) => {
+        if (!allTags.includes(tag)) {
+          allTags.push(tag);
+        }
+      });
+    });
+    setTags(allTags);
+  }, [decks]);
+
+  const loadDecks = () => {
+    const allDecks = getDecks();
+    const userDecks = allDecks.filter((deck) => deck.authorId === user?.id);
+
+    // Set all decks
+    setDecks(userDecks);
+
+    // Set favorite decks (simulation - in a real app this would use user preferences)
+    setFavoriteDecks(userDecks.filter((deck) => deck.isPublic).slice(0, 3));
+  };
+
+  const filteredDecks = decks.filter((deck) => {
+    // Filter by search term
+    const matchesFilter =
+      deck.title.toLowerCase().includes(filter.toLowerCase()) ||
+      deck.description.toLowerCase().includes(filter.toLowerCase());
+
+    // Filter by selected tags
+    const matchesTags =
+      selectedTags.length === 0 ||
+      selectedTags.some((tag) => deck.tags.includes(tag));
+
+    return matchesFilter && matchesTags;
+  });
+
+  // Sort decks based on the selected method
+  const sortedDecks = [...filteredDecks].sort((a, b) => {
+    if (sortMethod === "date") {
+      return b.updatedAt - a.updatedAt;
+    } else {
+      return a.title.localeCompare(b.title);
+    }
+  });
+
+  const handleTagSelect = (tag: string) => {
+    if (selectedTags.includes(tag)) {
+      setSelectedTags(selectedTags.filter((t) => t !== tag));
+    } else {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+  const clearFilters = () => {
+    setFilter("");
+    setSelectedTags([]);
+    setSortMethod("date");
+  };
+
+  const handleShareDeck = (deckId: string) => {
+    setDeckToShare(deckId);
+    setShareDialogOpen(true);
+  };
 
   return (
-    <div className={`container mx-auto p-4 md:p-6 animate-fade-in pb-20 ${isMobile ? 'mobile-app-container' : ''}`}>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold font-display bg-gradient-to-r from-primary via-tertiary to-secondary bg-clip-text text-transparent mb-4 md:mb-0">
-          Mes Decks
-        </h1>
-        <div className="flex gap-2 w-full md:w-auto">
-          <Button 
-            variant="outline" 
-            onClick={refreshDecks} 
-            disabled={isLoading}
-            className="flex-1 md:flex-none"
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCcw className="mr-2 h-4 w-4" />
-            )}
-            {!isMobile && "Actualiser"}
-          </Button>
-          <Button 
-            asChild 
-            className="flex-1 md:flex-none bg-gradient-to-r from-primary to-tertiary hover:from-primary/90 hover:to-tertiary/90"
-          >
+    <div className="container px-4 py-8">
+      <div className="flex flex-col md:flex-row items-start gap-4 mb-8">
+        <h1 className="text-3xl font-bold">Mes decks</h1>
+        <div className="flex-1 flex justify-end">
+          <Button asChild>
             <Link to="/create">
-              <Plus className="mr-2 h-4 w-4" />
-              {isMobile ? "Créer" : "Créer un nouveau deck"}
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Créer un deck
             </Link>
           </Button>
         </div>
-      </div>
-      
-      {storageInfo && (
-        <div className="mb-6 bg-quaternary/10 rounded-lg p-3 text-sm">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Espace utilisé:</span>
-            <span className="font-medium">{Math.round(storageInfo.usage / 1024 / 1024)}MB / {Math.round(storageInfo.quota / 1024 / 1024)}MB</span>
-          </div>
-          <div className="w-full bg-muted h-2 rounded-full mt-2">
-            <div 
-              className="h-full rounded-full bg-gradient-to-r from-primary to-tertiary" 
-              style={{ width: `${storageInfo.percentUsed}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
-      
-      <div className="flex justify-between items-center mb-6">
-        <div className="text-sm text-muted-foreground">
-          {decks.length} deck{decks.length !== 1 ? "s" : ""}
-        </div>
-        <Button variant="ghost" size="sm" className="text-sm">
-          <Filter className="h-4 w-4 mr-2" />
-          Filtrer
-        </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-muted-foreground">Chargement des decks...</span>
+      <div className="flex flex-col lg:flex-row gap-6 mb-8">
+        <div className="w-full lg:w-2/3">
+          <div className="bg-card rounded-lg shadow p-6">
+            <div className="flex flex-col lg:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher un deck..."
+                  className="pl-10"
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                      <ListFilter className="h-4 w-4 mr-2" />
+                      Filtres
+                      {selectedTags.length > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="ml-2 bg-primary text-white"
+                        >
+                          {selectedTags.length}
+                        </Badge>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Tags</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {tags.length > 0 ? (
+                      tags.map((tag) => (
+                        <DropdownMenuItem
+                          key={tag}
+                          className="flex items-center justify-between cursor-pointer"
+                          onClick={() => handleTagSelect(tag)}
+                        >
+                          <span>{tag}</span>
+                          {selectedTags.includes(tag) && <Check className="h-4 w-4" />}
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <DropdownMenuItem disabled>Aucun tag</DropdownMenuItem>
+                    )}
+                    {selectedTags.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => setSelectedTags([])}
+                          className="text-red-500"
+                        >
+                          Effacer les filtres
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                      <ArrowUpDown className="h-4 w-4 mr-2" />
+                      Trier
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuItem
+                      onClick={() => setSortMethod("date")}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2" />
+                        Date de modification
+                      </div>
+                      {sortMethod === "date" && <Check className="h-4 w-4" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setSortMethod("alphabetical")}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Alphabétique
+                      </div>
+                      {sortMethod === "alphabetical" && <Check className="h-4 w-4" />}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {(filter || selectedTags.length > 0) && (
+                  <Button variant="ghost" onClick={clearFilters}>
+                    <X className="h-4 w-4 mr-2" />
+                    Effacer
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {selectedTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selectedTags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="px-2 py-1 text-xs"
+                  >
+                    {tag}
+                    <X
+                      className="h-3 w-3 ml-1 cursor-pointer"
+                      onClick={() =>
+                        setSelectedTags(selectedTags.filter((t) => t !== tag))
+                      }
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            <Tabs defaultValue="all">
+              <TabsList className="mb-6">
+                <TabsTrigger value="all">Tous mes decks</TabsTrigger>
+                <TabsTrigger value="public">Decks publics</TabsTrigger>
+                <TabsTrigger value="private">Decks privés</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all">
+                {sortedDecks.length > 0 ? (
+                  <div className="space-y-4">
+                    {sortedDecks.map((deck) => (
+                      <DeckCard
+                        key={deck.id}
+                        id={deck.id}
+                        title={deck.title}
+                        description={deck.description}
+                        coverImage={deck.coverImage}
+                        isPublic={deck.isPublic}
+                        authorEmail={user?.email || "Vous"}
+                        tags={deck.tags}
+                        cardCount={20} // Demo count, should be real in production
+                        onShare={() => handleShareDeck(deck.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BookOpen className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Aucun deck trouvé</h3>
+                    <p className="text-muted-foreground mb-6">
+                      {filter || selectedTags.length > 0
+                        ? "Aucun deck ne correspond à vos critères de recherche"
+                        : "Vous n'avez pas encore créé de deck"}
+                    </p>
+                    <Button asChild>
+                      <Link to="/create">
+                        <PlusIcon className="h-4 w-4 mr-2" />
+                        Créer un deck
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="public">
+                {sortedDecks.filter((deck) => deck.isPublic).length > 0 ? (
+                  <div className="space-y-4">
+                    {sortedDecks
+                      .filter((deck) => deck.isPublic)
+                      .map((deck) => (
+                        <DeckCard
+                          key={deck.id}
+                          id={deck.id}
+                          title={deck.title}
+                          description={deck.description}
+                          coverImage={deck.coverImage}
+                          isPublic={true}
+                          authorEmail={user?.email || "Vous"}
+                          tags={deck.tags}
+                          cardCount={20} // Demo count
+                          onShare={() => handleShareDeck(deck.id)}
+                        />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BookOpen className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">
+                      Aucun deck public trouvé
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      Vous pouvez rendre vos decks publics en les modifiant
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="private">
+                {sortedDecks.filter((deck) => !deck.isPublic).length > 0 ? (
+                  <div className="space-y-4">
+                    {sortedDecks
+                      .filter((deck) => !deck.isPublic)
+                      .map((deck) => (
+                        <DeckCard
+                          key={deck.id}
+                          id={deck.id}
+                          title={deck.title}
+                          description={deck.description}
+                          coverImage={deck.coverImage}
+                          isPublic={false}
+                          authorEmail={user?.email || "Vous"}
+                          tags={deck.tags}
+                          cardCount={20} // Demo count
+                          onShare={() => handleShareDeck(deck.id)}
+                        />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BookOpen className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">
+                      Aucun deck privé trouvé
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      Les decks privés ne sont visibles que par vous
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
-      ) : decks.length === 0 ? (
-        <div className="text-center py-12 card-gradient-accent rounded-lg p-8">
-          <p className="text-muted-foreground mb-6 font-serif">
-            Vous n'avez pas encore créé de decks.
-          </p>
-          <Button 
-            asChild 
-            size="lg" 
-            className="animate-pulse-slow bg-gradient-to-r from-primary via-tertiary to-secondary hover:from-primary/90 hover:via-tertiary/90 hover:to-secondary/90"
-          >
-            <Link to="/create">
-              <Plus className="mr-2 h-4 w-4" />
-              Créer votre premier deck
-            </Link>
-          </Button>
+
+        <div className="w-full lg:w-1/3">
+          <div className="bg-card rounded-lg shadow p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Favoris</h2>
+            {favoriteDecks.length > 0 ? (
+              <div className="space-y-4">
+                {favoriteDecks.map((deck) => (
+                  <div
+                    key={deck.id}
+                    className="border rounded-lg p-4 flex items-center justify-between"
+                  >
+                    <div>
+                      <Link
+                        to={`/deck/${deck.id}`}
+                        className="font-medium hover:text-primary"
+                      >
+                        {deck.title}
+                      </Link>
+                      <p className="text-xs text-muted-foreground">
+                        {deck.tags.slice(0, 2).join(", ")}
+                        {deck.tags.length > 2 && "..."}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to={`/deck/${deck.id}`}>
+                        <BookOpen className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <Star className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-muted-foreground text-sm">
+                  Marquez des decks en favoris pour les retrouver ici
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-card rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Importer</h2>
+            <div className="space-y-4">
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/import">
+                  <FileUp className="h-4 w-4 mr-2" />
+                  Importer un deck
+                </Link>
+              </Button>
+
+              <p className="text-sm text-muted-foreground">
+                Importez des decks partagés par d'autres utilisateurs ou
+                depuis un fichier
+              </p>
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {decks.map(deck => (
-            <DeckCard 
-              key={deck.id}
-              id={deck.id}
-              title={deck.title}
-              description={deck.description}
-              cardCount={0}
-              coverImage={deck.coverImage}
-              tags={deck.tags}
-              author={user?.name || 'Utilisateur'}
-              isPublic={deck.isPublic}
-            />
-          ))}
-        </div>
-      )}
+      </div>
+
+      <ShareDeckDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        deckId={deckToShare || ""}
+      />
     </div>
   );
 };

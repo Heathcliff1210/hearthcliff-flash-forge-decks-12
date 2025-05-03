@@ -38,7 +38,6 @@ import {
   createTheme, 
   createFlashcard, 
   getBase64, 
-  createShareCode,
   Theme,
   Flashcard
 } from "@/lib/localStorage";
@@ -271,7 +270,7 @@ const DeckPage = () => {
       
       toast({
         title: "Thème créé",
-        description: "Le thème a été ajouté avec succès",
+        description: "Le th��me a été ajouté avec succès",
       });
     } catch (error) {
       console.error("Error creating theme:", error);
@@ -350,11 +349,13 @@ const DeckPage = () => {
     }
   };
   
+  // Fonction pour générer un code de partage temporaire
   const generateShareLink = () => {
     if (!id) return;
     
     try {
-      const code = createShareCode(id, 30); // Expires in 30 days
+      // Générer un code simple (sans utiliser createShareCode qui n'existe pas)
+      const code = `share_${Date.now()}_${id}`;
       const shareLink = `${window.location.origin}/import/${code}`;
       setShareUrl(shareLink);
       setShareDialogOpen(true);
@@ -418,6 +419,25 @@ const DeckPage = () => {
       </div>
     );
   }
+  
+  // Fonction pour obtenir les initiales d'un utilisateur de manière sécurisée
+  const getUserInitials = (userId: string | undefined) => {
+    if (userId === user?.id && user) {
+      // Si l'utilisateur a un nom, on prend les deux premières lettres
+      // Sinon, on utilise 'ME' pour "Moi"
+      return user.email ? user.email.substring(0, 2).toUpperCase() : "ME";
+    }
+    return "AU"; // Pour "Autre Utilisateur"
+  };
+  
+  // Fonction pour obtenir le nom d'affichage de l'utilisateur
+  const getUserDisplayName = (userId: string | undefined) => {
+    if (userId === user?.id && user) {
+      // Si c'est l'utilisateur actuel, on utilise son email ou "Moi"
+      return user.email ? user.email.split('@')[0] : "Moi";
+    }
+    return "Autre utilisateur";
+  };
   
   return (
     <div className="container px-4 py-8">
@@ -524,10 +544,10 @@ const DeckPage = () => {
             <div className="flex items-center">
               <Avatar className="h-6 w-6 mr-2">
                 <AvatarFallback className="text-[10px] bg-primary/20 text-primary">
-                  {deck.authorId === user?.id ? user?.name.substring(0, 2).toUpperCase() : "AU"}
+                  {getUserInitials(deck.authorId)}
                 </AvatarFallback>
               </Avatar>
-              <span>{deck.authorId === user?.id ? user?.name : "Autre utilisateur"}</span>
+              <span>{getUserDisplayName(deck.authorId)}</span>
             </div>
             <Separator orientation="vertical" className="mx-2 h-4" />
             <div className="flex items-center">
