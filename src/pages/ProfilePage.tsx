@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import DataImportExport from "@/components/DataImportExport";
 import StorageMigrationTool from "@/components/StorageMigrationTool";
 import { hasSession } from "@/lib/sessionManager";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { User as UserType } from '@/lib/storage/types';
 
 const ProfilePage = () => {
   const { toast } = useToast();
@@ -57,7 +59,21 @@ const ProfilePage = () => {
     
     const userProfile = getProfile();
     if (userProfile) {
-      setProfile(userProfile);
+      setProfile({
+        id: userProfile.id,
+        username: userProfile.username,
+        email: userProfile.email,
+        bio: userProfile.bio || "",
+        displayName: userProfile.displayName || "",
+        avatar: userProfile.avatar || "",
+        avatarId: userProfile.avatarId || "",
+        settings: userProfile.settings || {
+          darkMode: false,
+          notifications: true,
+          soundEffects: true
+        }
+      });
+      
       setEditFormData({
         username: userProfile.username,
         email: userProfile.email,

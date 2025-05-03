@@ -14,12 +14,42 @@ export * from './storage';
 Storage.generateSampleData();
 
 // Profile management functions
-export function getProfile() {
-  return getUser();
+export function getProfile(): User | null {
+  const user = getUser();
+  
+  // Ensure user has all required fields for profile display
+  if (user) {
+    if (!user.settings) {
+      user.settings = {
+        darkMode: false,
+        notifications: true,
+        soundEffects: true
+      };
+    }
+    if (!user.bio) {
+      user.bio = "";
+    }
+    if (!user.displayName) {
+      user.displayName = "";
+    }
+  }
+  
+  return user;
 }
 
-export function updateProfile(user: User) {
-  return updateUser(user);
+export function updateProfile(user: Partial<User> & { id: string }): User | null {
+  const currentUser = getUser();
+  if (!currentUser) return null;
+  
+  // Preserve required fields that might not be included in the update
+  const updatedUser: User = {
+    ...currentUser,
+    ...user,
+    password: currentUser.password,
+    createdAt: currentUser.createdAt
+  };
+  
+  return updateUser(updatedUser);
 }
 
 export function resetUserData() {

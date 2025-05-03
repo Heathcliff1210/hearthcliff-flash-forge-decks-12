@@ -1,4 +1,3 @@
-
 // User management functionality
 import { User } from './types';
 import { getLocalStorageItem, setLocalStorageItem } from './utils';
@@ -18,6 +17,13 @@ export function createUser(username: string, email: string, password: string): U
     email,
     password,
     createdAt: Date.now(),
+    settings: {
+      darkMode: false,
+      notifications: true,
+      soundEffects: true
+    },
+    bio: "",
+    displayName: "",
   };
   
   users[id] = newUser;
@@ -36,9 +42,26 @@ export function getUser(): User | null {
   const users = getLocalStorageItem('users') || {};
   const user = users[sessionId] || null;
   
-  // Charger l'avatar si présent
-  if (user && user.avatarId) {
-    loadUserAvatar(user);
+  // Initialize default values for new fields if they don't exist
+  if (user) {
+    if (!user.settings) {
+      user.settings = {
+        darkMode: false,
+        notifications: true,
+        soundEffects: true
+      };
+    }
+    if (user.bio === undefined) {
+      user.bio = "";
+    }
+    if (user.displayName === undefined) {
+      user.displayName = "";
+    }
+    
+    // Charger l'avatar si présent
+    if (user.avatarId) {
+      loadUserAvatar(user);
+    }
   }
   
   return user;
@@ -73,21 +96,16 @@ export function setUser(user: User): void {
 /**
  * Update user information
  */
-export function updateUser(updates: Partial<User>): User | null {
+export function updateUser(updates: User): User | null {
   const currentUser = getUser();
   if (!currentUser) return null;
   
   const users = getLocalStorageItem('users') || {};
   
-  const updatedUser = {
-    ...currentUser,
-    ...updates
-  };
-  
-  users[currentUser.id] = updatedUser;
+  users[updates.id] = updates;
   setLocalStorageItem('users', users);
   
-  return updatedUser;
+  return updates;
 }
 
 /**

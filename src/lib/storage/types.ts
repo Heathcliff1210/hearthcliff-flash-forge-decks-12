@@ -1,4 +1,3 @@
-
 // Common data type definitions for the storage system
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,6 +10,13 @@ export interface User {
   createdAt: number;
   avatar?: string; // L'avatar en base64 (pour l'affichage)
   avatarId?: string; // Référence à l'avatar stocké dans IndexedDB
+  bio?: string;
+  displayName?: string;
+  settings?: {
+    darkMode: boolean;
+    notifications: boolean;
+    soundEffects: boolean;
+  };
 }
 
 export interface Deck {
