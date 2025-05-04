@@ -50,7 +50,7 @@ const DialogContent = React.forwardRef<
   
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay className="backdrop-blur-sm" />
       <DialogPrimitive.Content
         ref={ref}
         className={cn(

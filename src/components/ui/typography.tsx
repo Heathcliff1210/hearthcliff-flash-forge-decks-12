@@ -29,7 +29,7 @@ export function Heading({
   return (
     <Tag 
       className={cn(
-        'font-serif tracking-tight font-medium',
+        'font-serif tracking-tight font-medium leading-tight',
         sizeClasses[size],
         className
       )}
@@ -95,7 +95,7 @@ export function DisplayText({
   return (
     <h1 
       className={cn(
-        'font-serif font-bold tracking-tight leading-tight',
+        'font-serif font-bold tracking-tight leading-tight bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent',
         sizeClasses[size],
         className
       )}

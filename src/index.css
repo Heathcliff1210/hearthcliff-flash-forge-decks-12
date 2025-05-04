@@ -25,7 +25,7 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 262.1 83.3% 57.8%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
     --tertiary: 280 85% 65%;
     --tertiary-foreground: 210 20% 98%;
   }
@@ -67,6 +67,21 @@
   /* Application des polices spéciales */
   h1, h2, h3, .font-serif, .card-title {
     font-family: 'Playfair Display', serif;
+  }
+  
+  /* Amélioration des cartes */
+  .card {
+    @apply transition-shadow duration-300 hover:shadow-md;
+  }
+  
+  /* Amélioration des boutons */
+  button {
+    @apply transition-all duration-200;
+  }
+  
+  /* Effet sur les liens */
+  a:not(.btn):not(.no-underline) {
+    @apply relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full;
   }
 }
 
