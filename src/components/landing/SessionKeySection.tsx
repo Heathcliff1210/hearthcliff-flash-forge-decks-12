@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getSessionKey, saveSessionKey, generateSessionKey, exportSessionData } from '@/lib/sessionManager';
 import { toast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SessionKeySectionProps {
   sessionKey: string;
@@ -22,6 +23,7 @@ export const SessionKeySection = ({
   setExportData
 }: SessionKeySectionProps) => {
   const [isCopied, setIsCopied] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleCopyKey = () => {
     const currentSessionKey = getSessionKey();
@@ -57,13 +59,13 @@ export const SessionKeySection = ({
   if (!sessionKey) return null;
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-indigo-200/30 dark:border-indigo-800/30 shadow-lg max-w-md w-full mb-12">
+    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-indigo-200/30 dark:border-indigo-800/30 shadow-lg max-w-md w-full mb-8 sm:mb-12">
       <Badge variant="gradient" className="mb-3">Session active</Badge>
       <h3 className="text-lg font-medium mb-2">Votre clé de session:</h3>
-      <div className="bg-indigo-500/5 rounded-lg p-3 mb-3 font-mono text-lg tracking-wider border border-indigo-200/20 dark:border-indigo-800/20">
+      <div className="bg-indigo-500/5 rounded-lg p-2 sm:p-3 mb-3 font-mono text-sm sm:text-lg tracking-wider border border-indigo-200/20 dark:border-indigo-800/20 break-all">
         {sessionKey}
       </div>
-      <p className="text-sm mb-4 text-muted-foreground">
+      <p className="text-xs sm:text-sm mb-4 text-muted-foreground">
         Conservez cette clé pour accéder à vos données ultérieurement
       </p>
       <div className="flex flex-wrap gap-2 justify-center">
