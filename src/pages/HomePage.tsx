@@ -1,3 +1,4 @@
+
 // Corrigeons le problème dans HomePage.tsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -39,7 +40,7 @@ const HomePage = () => {
       <div className="flex flex-col md:flex-row gap-12 mb-12">
         <div className="flex-1">
           <h1 className="text-4xl font-bold mb-6">
-            Bienvenue sur FlashMaster
+            Bienvenue sur CDS FLASHCARD-BASE
           </h1>
           <h2 className="text-2xl text-muted-foreground mb-8">
             La plateforme pour créer et étudier des flashcards efficacement
