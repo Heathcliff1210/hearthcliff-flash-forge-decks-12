@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Database, HardDrive, Check, RefreshCw, Trash2 } from "lucide-react";
 import { migrateAllFlashcardMedia, checkForMigrationNeeded, cleanupMigratedData } from "@/utils/mediaMigrationTool";
 import { useToast } from "@/hooks/use-toast";
+import { Heading } from "@/components/ui/typography";
 
 /**
  * Composant pour gérer la migration des médias vers IndexedDB
@@ -96,15 +97,15 @@ const StorageMigrationTool = () => {
 
   return (
     <div className="space-y-4 border p-4 rounded-lg bg-background/50">
-      <h3 className="text-lg font-semibold flex items-center gap-2">
+      <Heading as="h3" size="lg" className="flex items-center gap-2">
         <Database className="h-5 w-5" />
         Gestion du stockage des médias
-      </h3>
+      </Heading>
       
       {itemsToMigrate > 0 ? (
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Médias à optimiser</AlertTitle>
+          <AlertTitle className="font-serif">Médias à optimiser</AlertTitle>
           <AlertDescription>
             {itemsToMigrate} flashcard(s) contiennent des médias qui peuvent être optimisés en les déplaçant vers IndexedDB.
           </AlertDescription>
@@ -112,7 +113,7 @@ const StorageMigrationTool = () => {
       ) : (
         <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
           <Check className="h-4 w-4 text-green-600" />
-          <AlertTitle>Stockage optimisé</AlertTitle>
+          <AlertTitle className="font-serif">Stockage optimisé</AlertTitle>
           <AlertDescription>
             Tous vos médias utilisent déjà le stockage hybride optimisé.
           </AlertDescription>
@@ -163,10 +164,10 @@ const StorageMigrationTool = () => {
       
       <div className="text-xs text-muted-foreground mt-2 space-y-1">
         <p>
-          <span className="font-semibold">Stockage hybride:</span> Les médias (images, audio) sont stockés dans IndexedDB pour économiser l'espace dans localStorage.
+          <span className="font-semibold font-serif">Stockage hybride:</span> Les médias (images, audio) sont stockés dans IndexedDB pour économiser l'espace dans localStorage.
         </p>
         <p>
-          <span className="font-semibold">Avantages:</span> Permet de stocker beaucoup plus de flashcards sans atteindre les limites de stockage du navigateur.
+          <span className="font-semibold font-serif">Avantages:</span> Permet de stocker beaucoup plus de flashcards sans atteindre les limites de stockage du navigateur.
         </p>
       </div>
     </div>

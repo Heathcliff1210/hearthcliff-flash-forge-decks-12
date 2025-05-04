@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -61,6 +62,11 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Application des polices spéciales */
+  h1, h2, h3, .font-serif, .card-title {
+    font-family: 'Playfair Display', serif;
   }
 }
 

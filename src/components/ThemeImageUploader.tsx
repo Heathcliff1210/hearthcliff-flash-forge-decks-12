@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X, Image, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { isBase64String } from '@/lib/storage/utils';
+import { migrateBase64MediaToIndexedDB } from '@/lib/storage/mediaStorage';
 
 interface ThemeImageUploaderProps {
   currentImage?: string;
@@ -22,6 +24,19 @@ const ThemeImageUploader: React.FC<ThemeImageUploaderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+  
+  // Optimisation : migration automatique vers IndexedDB si nécessaire
+  useEffect(() => {
+    if (currentImage && isBase64String(currentImage)) {
+      migrateBase64MediaToIndexedDB(currentImage)
+        .then(({ imageId }) => {
+          console.log("Image optimisée vers IndexedDB:", imageId);
+        })
+        .catch(error => {
+          console.error("Échec d'optimisation d'image:", error);
+        });
+    }
+  }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,7 +81,7 @@ const ThemeImageUploader: React.FC<ThemeImageUploaderProps> = ({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <Label htmlFor="theme-image" className="block mb-1">
+      <Label htmlFor="theme-image" className="block mb-1 font-serif">
         Image de couverture
       </Label>
 

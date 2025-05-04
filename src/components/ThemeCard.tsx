@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { updateTheme, deleteTheme, Theme } from "@/lib/localStorage";
 import ThemeImageUploader from "./ThemeImageUploader";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { migrateBase64MediaToIndexedDB } from "@/lib/storage/mediaStorage";
 
 export interface ThemeCardProps {
   id: string;
@@ -43,6 +44,20 @@ const ThemeCard = ({
     coverImage
   });
   const isMobile = useIsMobile();
+
+  // Optimisation : migration automatique des images en base64 vers IndexedDB
+  useState(() => {
+    if (coverImage && coverImage.startsWith('data:')) {
+      migrateBase64MediaToIndexedDB(coverImage).then(({ imageId }) => {
+        if (imageId && onUpdate) {
+          // Mettre à jour silencieusement le thème pour utiliser la référence IndexedDB
+          updateTheme(id, { coverImageId: imageId });
+        }
+      }).catch(error => {
+        console.error("Échec de migration automatique d'image:", error);
+      });
+    }
+  });
 
   const handleUpdate = () => {
     if (!editingTheme.title.trim()) {
@@ -170,7 +185,7 @@ const ThemeCard = ({
         )}
         <Link to={`/deck/${deckId}/theme/${id}`}>
           <CardHeader className="p-4">
-            <CardTitle className="line-clamp-1 text-base">{title}</CardTitle>
+            <CardTitle className="line-clamp-1 text-base font-serif">{title}</CardTitle>
             <CardDescription className="line-clamp-2 text-xs">
               {description}
             </CardDescription>
@@ -182,7 +197,7 @@ const ThemeCard = ({
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className={isMobile ? "mobile-form-container p-4 max-w-sm" : "max-w-md"}>
           <DialogHeader>
-            <DialogTitle>Modifier le thème</DialogTitle>
+            <DialogTitle className="font-serif">Modifier le thème</DialogTitle>
             <DialogDescription>
               Modifiez les détails de votre thème
             </DialogDescription>
@@ -198,6 +213,7 @@ const ThemeCard = ({
                   ...editingTheme,
                   title: e.target.value,
                 })}
+                className="font-serif"
               />
             </div>
             
@@ -239,7 +255,7 @@ const ThemeCard = ({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className={isMobile ? "mobile-form-container p-4 max-w-sm" : "max-w-md"}>
           <DialogHeader>
-            <DialogTitle>Supprimer le thème</DialogTitle>
+            <DialogTitle className="font-serif">Supprimer le thème</DialogTitle>
             <DialogDescription>
               Êtes-vous sûr de vouloir supprimer ce thème ? Cette action est irréversible.
             </DialogDescription>
